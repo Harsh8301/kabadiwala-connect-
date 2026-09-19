@@ -13,6 +13,7 @@ const materials = <String, MaterialItem>{
     icon: '🔌',
     formalRate: 650,
     informalRate: 480,
+    recoverableMinerals: ['Copper'],
     names: {
       'mr': 'तांब्याची केबल (Cables)',
       'hi': 'तांबे की केबल (Cables)',
@@ -39,6 +40,7 @@ const materials = <String, MaterialItem>{
     icon: '🖧',
     formalRate: 220,
     informalRate: 150,
+    recoverableMinerals: ['Gold', 'Copper', 'Tantalum', 'Gallium', 'Indium'],
     names: {
       'mr': 'सर्किट बोर्ड (PCB)',
       'hi': 'सर्किट बोर्ड (PCB)',
@@ -65,6 +67,7 @@ const materials = <String, MaterialItem>{
     icon: '🔋',
     formalRate: 110,
     informalRate: 75,
+    recoverableMinerals: ['Lithium', 'Cobalt', 'Nickel', 'Manganese'],
     hazardType: 'battery',
     names: {
       'mr': 'बॅटरी / सेल (Battery)',
@@ -92,6 +95,7 @@ const materials = <String, MaterialItem>{
     icon: '⚙️',
     formalRate: 180,
     informalRate: 125,
+    recoverableMinerals: ['Copper', 'Neodymium', 'Steel'],
     names: {
       'mr': 'इलेक्ट्रिक मोटर (Motor)',
       'hi': 'इलेक्ट्रिक मोटर (Motor)',
@@ -118,6 +122,7 @@ const materials = <String, MaterialItem>{
     icon: '📺',
     formalRate: 35,
     informalRate: 20,
+    recoverableMinerals: ['Leaded glass', 'Copper', 'Steel'],
     hazardType: 'crt',
     names: {
       'mr': 'सीआरटी डिस्प्ले (CRT)',
@@ -145,6 +150,7 @@ const materials = <String, MaterialItem>{
     icon: '📦',
     formalRate: 90,
     informalRate: 60,
+    recoverableMinerals: ['Copper', 'Lithium', 'Cobalt', 'Tantalum'],
     names: {
       'mr': 'मिश्रित ई-कचरा (Mixed)',
       'hi': 'मिश्रित ई-वेस्ट (Mixed)',
@@ -171,6 +177,7 @@ const materials = <String, MaterialItem>{
     icon: '❓',
     formalRate: 70,
     informalRate: 45,
+    recoverableMinerals: ['Copper', 'Trace alloys'],
     names: {
       'mr': 'इतर / अस्पष्ट (Other)',
       'hi': 'अन्य / अस्पष्ट (Other)',
@@ -194,6 +201,118 @@ const materials = <String, MaterialItem>{
   ),
 };
 
+class RecyclerLocation {
+  const RecyclerLocation({
+    required this.lat,
+    required this.lng,
+    required this.address,
+  });
+
+  final double lat;
+  final double lng;
+  final String address;
+}
+
+class RecyclerProfile {
+  const RecyclerProfile({
+    required this.recyclerId,
+    required this.name,
+    required this.location,
+    required this.materialsAccepted,
+    required this.authorizationStatus,
+    required this.authorizationDetails,
+    required this.contact,
+    required this.offeredRate,
+    required this.pickupAvailability,
+    required this.serviceArea,
+  });
+
+  final String recyclerId;
+  final String name;
+  final RecyclerLocation location;
+  final List<String> materialsAccepted;
+  final String authorizationStatus;
+  final String authorizationDetails;
+  final String contact;
+  final double offeredRate;
+  final String pickupAvailability;
+  final String serviceArea;
+}
+
+// TODO: Replace these entries with real CPCB/SPCB authorized recycler records
+// before production use. They are seeded prototype placeholders and are never
+// presented as verified authorization data.
+const recyclers = <RecyclerProfile>[
+  RecyclerProfile(
+    recyclerId: 'TODO-MH-001',
+    name: 'Authorized Recycler Placeholder - Mumbai',
+    location: RecyclerLocation(
+      lat: 19.076,
+      lng: 72.8777,
+      address: 'Mumbai, Maharashtra',
+    ),
+    materialsAccepted: ['battery', 'pcb', 'mixed', 'crt'],
+    authorizationStatus: 'TODO verify CPCB/SPCB authorization',
+    authorizationDetails:
+        'Seeded placeholder; replace with a CPCB/SPCB authorized recycler list entry.',
+    contact: 'pending-verification@example.com',
+    offeredRate: 1,
+    pickupAvailability: 'Same-day demo pickup',
+    serviceArea: 'Mumbai Metropolitan Region',
+  ),
+  RecyclerProfile(
+    recyclerId: 'TODO-MH-002',
+    name: 'Authorized Recycler Placeholder - Pune',
+    location: RecyclerLocation(
+      lat: 18.5204,
+      lng: 73.8567,
+      address: 'Pune, Maharashtra',
+    ),
+    materialsAccepted: ['cables', 'motor', 'pcb', 'mixed'],
+    authorizationStatus: 'TODO verify CPCB/SPCB authorization',
+    authorizationDetails:
+        'Seeded placeholder; replace with a CPCB/SPCB authorized recycler list entry.',
+    contact: 'pending-verification@example.com',
+    offeredRate: .98,
+    pickupAvailability: 'Next-day demo pickup',
+    serviceArea: 'Pune district',
+  ),
+  RecyclerProfile(
+    recyclerId: 'TODO-DL-001',
+    name: 'Authorized Recycler Placeholder - Delhi NCR',
+    location: RecyclerLocation(
+      lat: 28.6139,
+      lng: 77.209,
+      address: 'Delhi NCR',
+    ),
+    materialsAccepted: ['battery', 'crt', 'mixed', 'other'],
+    authorizationStatus: 'TODO verify CPCB/SPCB authorization',
+    authorizationDetails:
+        'Seeded placeholder; replace with a CPCB/SPCB authorized recycler list entry.',
+    contact: 'pending-verification@example.com',
+    offeredRate: .96,
+    pickupAvailability: '48-hour demo pickup',
+    serviceArea: 'Delhi NCR',
+  ),
+  RecyclerProfile(
+    recyclerId: 'TODO-KA-001',
+    name: 'Authorized Recycler Placeholder - Bengaluru',
+    location: RecyclerLocation(
+      lat: 12.9716,
+      lng: 77.5946,
+      address: 'Bengaluru, Karnataka',
+    ),
+    materialsAccepted: ['pcb', 'cables', 'motor', 'mixed', 'other'],
+    authorizationStatus: 'TODO verify CPCB/SPCB authorization',
+    authorizationDetails:
+        'Seeded placeholder; replace with a CPCB/SPCB authorized recycler list entry.',
+    contact: 'pending-verification@example.com',
+    offeredRate: .99,
+    pickupAvailability: 'Scheduled demo pickup',
+    serviceArea: 'Bengaluru Urban',
+  ),
+];
+
 const translations = <String, Map<String, String>>{
   'mr': {
     'appTitle': 'कबाडीवाला कनेक्ट',
@@ -209,6 +328,7 @@ const translations = <String, Map<String, String>>{
     'start': 'नवीन भंगार नोंदणी करा',
     'rates': 'आजचे संदर्भ भाव ऐका',
     'disclaimer': 'सीडेड प्रोटोटाइप संदर्भ दर — थेट बाजार भाव नाही',
+    'phone': 'कलेक्टर फोन नंबर',
     'recent': 'अलीकडील नोंदणी',
     'viewAll': 'सर्व पहा →',
     'captureTitle': 'भंगार मालाचा फोटो काढा',
@@ -220,7 +340,14 @@ const translations = <String, Map<String, String>>{
     'scanning': 'सामग्री ओळखत आहे...',
     'confirmTitle': 'सामग्रीची खात्री करा',
     'confirmSub': 'आम्ही चुकीचा अंदाज न लावता थेट खात्री करून घेतो.',
-    'suggestion': 'प्रोटोटाइप अंदाज',
+    'suggestion': 'AI सूचना',
+    'possibleMaterial': 'संभाव्य साहित्य',
+    'confidence': 'खात्री',
+    'uncertainDetection': 'ही वस्तू खात्रीने ओळखता आली नाही.',
+    'detectionUnavailable': 'ओळख सेवा उपलब्ध नाही. साहित्य स्वतः निवडा.',
+    'verifyAi': 'AI अंदाजे ओळख देते. भाव आणि हस्तांतरणापूर्वी साहित्य तपासा.',
+    'retryDetection': 'पुन्हा ओळखा',
+    'manualFallback': 'साहित्य निवडून पुढे जा.',
     'selectCorrect': 'अचूक निवडीसाठी खालील पर्यायावर टॅप करा:',
     'hazardous': 'धोकादायक',
     'priceTitle': 'वजन आणि रास्त भाव अंदाज',
@@ -235,6 +362,18 @@ const translations = <String, Map<String, String>>{
     'formalBenefit':
         'अधिकृत रीसायकलिंगमुळे मध्यस्थांशिवाय योग्य तोल, अचूक वजन आणि संपूर्ण मूल्य मिळते.',
     'lotTitle': 'लॉट पावती आणि हस्तांतरण',
+    'matchTitle': 'अधिकृत रिसायकलर जुळणी',
+    'confirmRecycler': 'रिसायकलर निश्चित करा',
+    'recyclerView': 'रिसायकलर दृश्य',
+    'collectorView': 'कलेक्टर दृश्य',
+    'recoverable': 'पुनर्प्राप्त',
+    'gps': 'GPS स्थान',
+    'locationUnavailable': 'स्थान उपलब्ध नाही',
+    'paymentTitle': 'पेमेंट पद्धत',
+    'receipt': 'प्राप्ती पुष्टी करा',
+    'noPendingLots': 'पुष्टीसाठी लॉट नाहीत',
+    'paid': 'पेड',
+    'pending': 'लंबित',
     'lotSub': 'अधिकृत केंद्रासाठी डिजिटल पावती तयार केली आहे.',
     'awaiting': 'हस्तांतरणाची प्रतीक्षा',
     'material': 'सामग्री',
@@ -294,6 +433,7 @@ const translations = <String, Map<String, String>>{
     'start': 'नया कबाड़ पिकअप शुरू करें',
     'rates': 'आज के संदर्भ भाव सुनें',
     'disclaimer': 'सीडेड प्रोटोटाइप संदर्भ दर — वास्तविक बाज़ार भाव नहीं',
+    'phone': 'कलेक्टर फोन नंबर',
     'recent': 'हालिया रिकॉर्ड',
     'viewAll': 'सभी देखें →',
     'captureTitle': 'कबाड़ का फोटो खींचें',
@@ -305,7 +445,16 @@ const translations = <String, Map<String, String>>{
     'scanning': 'सामग्री की पहचान हो रही है...',
     'confirmTitle': 'सामग्री की पुष्टि करें',
     'confirmSub': 'हम गलत अनुमान लगाने के बजाय आपसे पुष्टि करते हैं।',
-    'suggestion': 'प्रोटोटाइप सुझाव',
+    'suggestion': 'AI सुझाव',
+    'possibleMaterial': 'संभावित सामग्री',
+    'confidence': 'भरोसा',
+    'uncertainDetection': 'इस वस्तु की भरोसेमंद पहचान नहीं हो सकी।',
+    'detectionUnavailable':
+        'पहचान सेवा उपलब्ध नहीं है। सामग्री मैन्युअल रूप से चुनें।',
+    'verifyAi':
+        'AI केवल अनुमानित पहचान देता है। मूल्य और हैंडओवर से पहले सामग्री जांचें।',
+    'retryDetection': 'फिर से पहचानें',
+    'manualFallback': 'सामग्री चुनकर आगे बढ़ें।',
     'selectCorrect': 'सटीक चयन के लिए नीचे दिए विकल्प पर टैप करें:',
     'hazardous': 'खतरनाक',
     'priceTitle': 'वजन और उचित मूल्य अनुमान',
@@ -320,6 +469,18 @@ const translations = <String, Map<String, String>>{
     'formalBenefit':
         'अधिकृत रीसाइक्लिंग से बिचौलियों के बिना पूरा तौल, सही वजन और पूरा मूल्य मिलता है।',
     'lotTitle': 'लॉट रसीद और हैंडओवर',
+    'matchTitle': 'अधिकृत रिसाइकलर मिलान',
+    'confirmRecycler': 'रिसाइकलर पुष्टि करें',
+    'recyclerView': 'रिसाइकलर व्यू',
+    'collectorView': 'कलेक्टर व्यू',
+    'recoverable': 'रिकवर होने वाले',
+    'gps': 'GPS लोकेशन',
+    'locationUnavailable': 'लोकेशन उपलब्ध नहीं',
+    'paymentTitle': 'भुगतान पद्धति',
+    'receipt': 'प्राप्ति पुष्टि करें',
+    'noPendingLots': 'पुष्टि के लिए कोई लॉट नहीं',
+    'paid': 'भुगतान',
+    'pending': 'लंबित',
     'lotSub': 'अधिकृत केंद्र के लिए डिजिटल रसीद तैयार की गई है।',
     'awaiting': 'हस्तांतरण की प्रतीक्षा',
     'material': 'सामग्री',
@@ -380,6 +541,7 @@ const translations = <String, Map<String, String>>{
     'start': 'Start Scrap Pickup',
     'rates': "Hear Today’s Rates",
     'recent': 'Recent Handover',
+    'phone': 'Collector phone number',
     'viewAll': 'View All →',
     'captureTitle': 'Photograph the scrap',
     'captureSub': 'Take a clear photo or pick from your device gallery.',
@@ -390,7 +552,16 @@ const translations = <String, Map<String, String>>{
     'scanning': 'Identifying material...',
     'confirmTitle': 'Confirm the material',
     'confirmSub': 'We ask you to verify rather than making an unsafe guess.',
-    'suggestion': 'Prototype Suggestion',
+    'suggestion': 'AI suggestion',
+    'possibleMaterial': 'Possible material',
+    'confidence': 'Confidence',
+    'uncertainDetection': 'We could not confidently identify this item.',
+    'detectionUnavailable':
+        'Detection service is unavailable. Select the material manually.',
+    'verifyAi':
+        'AI provides an approximate identification. Verify the material before price and handover.',
+    'retryDetection': 'Retry detection',
+    'manualFallback': 'Select the material to continue.',
     'selectCorrect': 'Tap below to select or correct the material:',
     'hazardous': 'Hazardous',
     'priceTitle': 'Weight & Fair-Price Estimate',
@@ -405,6 +576,18 @@ const translations = <String, Map<String, String>>{
     'formalBenefit':
         'A formal recycling channel provides transparent weighing, fair pricing, and documented verification.',
     'lotTitle': 'Lot Record & Handover',
+    'matchTitle': 'Authorized Recycler Match',
+    'confirmRecycler': 'Confirm Recycler',
+    'recyclerView': 'Recycler View',
+    'collectorView': 'Collector View',
+    'recoverable': 'Recoverable',
+    'gps': 'GPS location',
+    'locationUnavailable': 'Location unavailable',
+    'paymentTitle': 'Payment Method',
+    'receipt': 'Confirm Receipt',
+    'noPendingLots': 'No lots pending confirmation',
+    'paid': 'Paid',
+    'pending': 'Pending',
     'lotSub': 'Digital handover pass generated for authorized recycling.',
     'awaiting': 'Awaiting Handover',
     'material': 'Material',

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -74,6 +76,16 @@ class LotScreen extends StatelessWidget {
                     label: '${controller.t('expectedValue')}:',
                     value: controller.currencyFormal,
                     highlight: true),
+                LabelValue(
+                    label: '${controller.t('gps')}:',
+                    value: controller.locationStatus == 'unavailable'
+                        ? controller.t('locationUnavailable')
+                        : controller.collectionLocationLabel),
+                if (controller.isLocating)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: LinearProgressIndicator(),
+                  ),
                 const SizedBox(height: 8),
                 Text(controller.t('traceNotice'),
                     textAlign: TextAlign.center,
@@ -147,6 +159,93 @@ class LotScreen extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      );
+}
+
+class RecyclerMatchScreen extends StatelessWidget {
+  const RecyclerMatchScreen({required this.controller, super.key});
+  final AppController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final matches = controller.recyclerMatches();
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        ScreenHeading(
+          title: controller.t('matchTitle'),
+          subtitle:
+              '${controller.material.nameFor(controller.language)} • ${controller.collectionLocationLabel}',
+        ),
+        const SizedBox(height: 12),
+        ...matches.map((recycler) {
+          final km = controller.distanceToRecycler(recycler);
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: AppCard(
+              borderColor: recycler.recyclerId == controller.selectedRecyclerId
+                  ? primary
+                  : border,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.verified_rounded, color: primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(recycler.name,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w900)),
+                      ),
+                      Pill('${km.toStringAsFixed(0)} km'),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(recycler.location.address,
+                      style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(height: 6),
+                  Pill('Authorized status: ${recycler.authorizationStatus}',
+                      color: const Color(0xFFFEF3C7),
+                      textColor: const Color(0xFF92400E)),
+                  const SizedBox(height: 8),
+                  Text(recycler.authorizationDetails,
+                      style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(height: 8),
+                  Text(recycler.materialsAccepted.join(', '),
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 10),
+                  PrimaryButton(
+                    label: controller.t('confirmRecycler'),
+                    icon: Icons.local_shipping_rounded,
+                    onPressed: () {
+                      controller.chooseRecycler(recycler.recyclerId);
+                      controller.goTo(AppScreen.payment);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class PaymentScreen extends StatelessWidget {
+  const PaymentScreen({required this.controller, super.key});
+  final AppController controller;
+
+  @override
+  Widget build(BuildContext context) => ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          ScreenHeading(
+            title: controller.t('paymentTitle'),
+            subtitle: controller.selectedRecycler?.name ?? '',
+          ),
           const SizedBox(height: 12),
           AppCard(
             child: Column(
@@ -159,6 +258,7 @@ class LotScreen extends StatelessWidget {
                   selected: controller.paymentMethod == 'cash',
                   title: '💵 ${controller.t('cash')}',
                   subtitle: controller.t('cashSub'),
+                  emphasized: true,
                   onTap: () => controller.setPayment('cash'),
                 ),
                 const SizedBox(height: 8),
@@ -166,6 +266,7 @@ class LotScreen extends StatelessWidget {
                   selected: controller.paymentMethod == 'upi',
                   title: '📱 ${controller.t('upi')}',
                   subtitle: controller.t('upiSub'),
+                  emphasized: false,
                   onTap: () => controller.setPayment('upi'),
                 ),
                 const SizedBox(height: 8),
@@ -183,11 +284,13 @@ class _PaymentOption extends StatelessWidget {
       {required this.selected,
       required this.title,
       required this.subtitle,
-      required this.onTap});
+      required this.onTap,
+      this.emphasized = false});
   final bool selected;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final bool emphasized;
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -195,7 +298,7 @@ class _PaymentOption extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(emphasized ? 15 : 10),
           decoration: BoxDecoration(
             color: selected ? primaryLight : Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -204,8 +307,13 @@ class _PaymentOption extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Radio<bool>(
-                  value: true, groupValue: selected, onChanged: (_) => onTap()),
+              Icon(
+                selected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_off_rounded,
+                color: selected ? primary : textMuted,
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,6 +321,7 @@ class _PaymentOption extends StatelessWidget {
                     Text(title,
                         style: TextStyle(
                             color: selected ? primary : textMain,
+                            fontSize: emphasized ? 16 : 13,
                             fontWeight: FontWeight.w800)),
                     Text(subtitle,
                         style: Theme.of(context).textTheme.bodySmall),
@@ -253,8 +362,12 @@ class LedgerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final totalWeight =
         controller.ledger.fold<double>(0, (sum, item) => sum + item.weightKg);
-    final totalValue =
-        controller.ledger.fold<int>(0, (sum, item) => sum + item.formalPrice);
+    final paidValue = controller.ledger
+        .where((item) => item.paymentStatus == 'Paid')
+        .fold<int>(0, (sum, item) => sum + item.formalPrice);
+    final pendingValue = controller.ledger
+        .where((item) => item.paymentStatus != 'Paid')
+        .fold<int>(0, (sum, item) => sum + item.formalPrice);
     final latest = controller.ledger.isEmpty ? null : controller.ledger.last;
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -331,9 +444,13 @@ class LedgerScreen extends StatelessWidget {
                       value: '${totalWeight.toStringAsFixed(1)} kg')),
               Expanded(
                   child: _Total(
-                      label: controller.t('totalValue'),
-                      value: controller.formatCurrency(totalValue),
+                      label: controller.t('paid'),
+                      value: controller.formatCurrency(paidValue),
                       highlight: true)),
+              Expanded(
+                  child: _Total(
+                      label: controller.t('pending'),
+                      value: controller.formatCurrency(pendingValue))),
             ],
           ),
         ),
@@ -360,12 +477,24 @@ class LedgerScreen extends StatelessWidget {
                           Text(
                               '${record.timeLabel} • ${record.paymentMethod == 'cash' ? '💵 Cash' : '📱 UPI'}',
                               style: Theme.of(context).textTheme.bodySmall),
+                          Text(
+                              '${record.transactionStatus} • ${record.recyclerName}',
+                              style: Theme.of(context).textTheme.bodySmall),
                         ],
                       ),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
+                        Pill(
+                          record.paymentStatus,
+                          color: record.paymentStatus == 'Paid'
+                              ? primaryLight
+                              : const Color(0xFFFEF3C7),
+                          textColor: record.paymentStatus == 'Paid'
+                              ? primary
+                              : const Color(0xFF92400E),
+                        ),
                         Text(controller.formatCurrency(record.formalPrice),
                             style: const TextStyle(
                                 color: primary,
@@ -391,6 +520,89 @@ class LedgerScreen extends StatelessWidget {
             label: controller.t('home'),
             icon: Icons.home_rounded,
             onPressed: () => controller.goTo(AppScreen.welcome)),
+        const SizedBox(height: 8),
+        SecondaryButton(
+            label: controller.t('recyclerView'),
+            icon: Icons.verified_rounded,
+            onPressed: () => controller.goTo(AppScreen.recyclerView)),
+      ],
+    );
+  }
+}
+
+class RecyclerViewScreen extends StatelessWidget {
+  const RecyclerViewScreen({required this.controller, super.key});
+  final AppController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = controller.ledger
+        .where((record) => record.transactionStatus != 'completed')
+        .toList()
+        .reversed;
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        ScreenHeading(
+          title: controller.t('recyclerView'),
+          subtitle: controller.t('confirmHandover'),
+        ),
+        const SizedBox(height: 12),
+        ...pending.map((record) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: AppCard(
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: record.scrapImageBase64 == null
+                          ? MaterialPreview(
+                              category: record.category,
+                              height: 64,
+                            )
+                          : Image.memory(
+                              base64Decode(record.scrapImageBase64!),
+                              width: 64,
+                              height: 64,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(materials[record.category]!
+                              .nameFor(controller.language)),
+                          Text(
+                            '${record.weightKg} kg • ${controller.formatCurrency(record.formalPrice)}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          Text(record.lotId,
+                              style: const TextStyle(
+                                  color: secondary,
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: () =>
+                          controller.confirmRecyclerReceipt(record.lotId),
+                      child: Text(controller.t('receipt')),
+                    ),
+                  ],
+                ),
+              ),
+            )),
+        if (pending.isEmpty)
+          AppCard(child: Center(child: Text(controller.t('noPendingLots')))),
+        const SizedBox(height: 8),
+        SecondaryButton(
+          label: controller.t('collectorView'),
+          icon: Icons.person_rounded,
+          onPressed: () => controller.goTo(AppScreen.ledger),
+        ),
       ],
     );
   }

@@ -9,7 +9,15 @@ class LotRecord {
     required this.informalPrice,
     required this.potentialExtra,
     required this.paymentMethod,
+    required this.paymentStatus,
+    required this.transactionStatus,
+    required this.recyclerConfirmation,
+    required this.recyclerId,
+    required this.recyclerName,
+    required this.collectionLocationLabel,
+    required this.handoverLocationLabel,
     required this.hasWitnessImage,
+    this.scrapImageBase64,
     this.witnessImageBase64,
     required this.timestamp,
   });
@@ -21,7 +29,15 @@ class LotRecord {
   final int informalPrice;
   final int potentialExtra;
   final String paymentMethod;
+  final String paymentStatus;
+  final String transactionStatus;
+  final bool recyclerConfirmation;
+  final String recyclerId;
+  final String recyclerName;
+  final String collectionLocationLabel;
+  final String handoverLocationLabel;
   final bool hasWitnessImage;
+  final String? scrapImageBase64;
   final String? witnessImageBase64;
   final DateTime timestamp;
 
@@ -39,7 +55,15 @@ class LotRecord {
         'informalPrice': informalPrice,
         'potentialExtra': potentialExtra,
         'paymentMethod': paymentMethod,
+        'paymentStatus': paymentStatus,
+        'transactionStatus': transactionStatus,
+        'recyclerConfirmation': recyclerConfirmation,
+        'recyclerId': recyclerId,
+        'recyclerName': recyclerName,
+        'collectionLocationLabel': collectionLocationLabel,
+        'handoverLocationLabel': handoverLocationLabel,
         'hasWitnessImage': hasWitnessImage,
+        'scrapImageBase64': scrapImageBase64,
         'witnessImageBase64': witnessImageBase64,
         'timestamp': timestamp.toIso8601String(),
       };
@@ -52,7 +76,17 @@ class LotRecord {
         informalPrice: (json['informalPrice'] as num).round(),
         potentialExtra: (json['potentialExtra'] as num).round(),
         paymentMethod: json['paymentMethod'] as String? ?? 'cash',
+        paymentStatus: json['paymentStatus'] as String? ?? 'Paid',
+        transactionStatus: json['transactionStatus'] as String? ?? 'completed',
+        recyclerConfirmation: json['recyclerConfirmation'] as bool? ?? true,
+        recyclerId: json['recyclerId'] as String? ?? '',
+        recyclerName: json['recyclerName'] as String? ?? 'Legacy recycler',
+        collectionLocationLabel: json['collectionLocationLabel'] as String? ??
+            'Location unavailable',
+        handoverLocationLabel:
+            json['handoverLocationLabel'] as String? ?? 'Location unavailable',
         hasWitnessImage: json['hasWitnessImage'] as bool? ?? false,
+        scrapImageBase64: json['scrapImageBase64'] as String?,
         witnessImageBase64: json['witnessImageBase64'] as String?,
         timestamp: DateTime.parse(json['timestamp'] as String),
       );

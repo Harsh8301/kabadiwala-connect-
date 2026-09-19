@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../data/app_data.dart';
 
-const primary = Color(brandGreen);
-const primaryDark = Color(brandGreenDark);
-const primaryLight = Color(brandGreenLight);
-const secondary = Color(traceBlue);
+const primary = Color(0xFF176B3A);
+const primaryDark = Color(0xFF0B3D25);
+const primaryLight = Color(0xFFE4F2E7);
+const secondary = Color(0xFFB8612A);
+const copper = Color(0xFFB8612A);
 const warning = Color(amber);
 const danger = Color(hazardRed);
 const canvas = Color(0xFFEDEFEA);
-const appBackground = Color(0xFFF7F9F6);
-const subtle = Color(0xFFF1F4F0);
-const textMain = Color(0xFF1F2937);
-const textMuted = Color(0xFF4B5563);
-const border = Color(0xFFE5E7EB);
+const appBackground = Color(0xFFFAF7EF);
+const subtle = Color(0xFFF0F4EC);
+const textMain = Color(0xFF27322C);
+const textMuted = Color(0xFF56635B);
+const border = Color(0xFFDDE4DB);
 
 ThemeData buildTheme() => ThemeData(
       useMaterial3: true,
@@ -24,6 +25,37 @@ ThemeData buildTheme() => ThemeData(
         secondary: secondary,
         error: danger,
         surface: Colors.white,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFFFAF7EF),
+        foregroundColor: primaryDark,
+        centerTitle: false,
+        elevation: 0,
+        scrolledUnderElevation: 1,
+      ),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: border),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(48, 52),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(48, 50),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
       ),
       textTheme: const TextTheme(
         headlineSmall: TextStyle(
@@ -41,7 +73,7 @@ ThemeData buildTheme() => ThemeData(
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: border),
         ),
       ),
@@ -147,7 +179,8 @@ class SecondaryButton extends StatelessWidget {
 }
 
 class Pill extends StatelessWidget {
-  const Pill(this.text, {super.key, this.color = subtle, this.textColor = textMuted});
+  const Pill(this.text,
+      {super.key, this.color = subtle, this.textColor = textMuted});
 
   final String text;
   final Color color;
@@ -163,7 +196,8 @@ class Pill extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: TextStyle(fontSize: 11.5, color: textColor, fontWeight: FontWeight.w600),
+          style: TextStyle(
+              fontSize: 11.5, color: textColor, fontWeight: FontWeight.w600),
         ),
       );
 }
@@ -205,7 +239,7 @@ class MaterialPreview extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [data.$2, data.$3.withOpacity(.78)],
+          colors: [data.$2, data.$3.withValues(alpha: .78)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -218,7 +252,11 @@ class MaterialPreview extends StatelessWidget {
 }
 
 class LabelValue extends StatelessWidget {
-  const LabelValue({required this.label, required this.value, super.key, this.highlight = false});
+  const LabelValue(
+      {required this.label,
+      required this.value,
+      super.key,
+      this.highlight = false});
   final String label;
   final String value;
   final bool highlight;
@@ -228,7 +266,8 @@ class LabelValue extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: [
-            Expanded(child: Text(label, style: const TextStyle(color: textMuted))),
+            Expanded(
+                child: Text(label, style: const TextStyle(color: textMuted))),
             Text(
               value,
               style: TextStyle(

@@ -31,7 +31,10 @@ class HomeScreen extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(20),
             boxShadow: const [
-              BoxShadow(color: Color(0x331B5E20), blurRadius: 18, offset: Offset(0, 8)),
+              BoxShadow(
+                  color: Color(0x331B5E20),
+                  blurRadius: 18,
+                  offset: Offset(0, 8)),
             ],
           ),
           child: Column(
@@ -39,7 +42,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               Pill(
                 controller.t('heroBadge'),
-                color: Colors.white.withOpacity(.14),
+                color: Colors.white.withValues(alpha: .14),
                 textColor: Colors.white,
               ),
               const SizedBox(height: 14),
@@ -62,20 +65,34 @@ class HomeScreen extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  Pill('⚖️ ${controller.t('featFair')}', color: const Color(0x22FFFFFF), textColor: Colors.white),
-                  Pill('🛡️ ${controller.t('featSafety')}', color: const Color(0x22FFFFFF), textColor: Colors.white),
-                  Pill('📜 ${controller.t('featQr')}', color: const Color(0x22FFFFFF), textColor: Colors.white),
-                  Pill('💵 ${controller.t('featCash')}', color: const Color(0x22FFFFFF), textColor: Colors.white),
+                  Pill('⚖️ ${controller.t('featFair')}',
+                      color: const Color(0x22FFFFFF), textColor: Colors.white),
+                  Pill('🛡️ ${controller.t('featSafety')}',
+                      color: const Color(0x22FFFFFF), textColor: Colors.white),
+                  Pill('📜 ${controller.t('featQr')}',
+                      color: const Color(0x22FFFFFF), textColor: Colors.white),
+                  Pill('💵 ${controller.t('featCash')}',
+                      color: const Color(0x22FFFFFF), textColor: Colors.white),
                 ],
               ),
             ],
           ),
         ),
         const SizedBox(height: 14),
+        TextField(
+          keyboardType: TextInputType.phone,
+          decoration: InputDecoration(
+            labelText: controller.t('phone'),
+            prefixIcon: const Icon(Icons.phone_rounded),
+          ),
+          onChanged: controller.setCollectorId,
+        ),
+        const SizedBox(height: 10),
         PrimaryButton(
           label: controller.t('start'),
           icon: Icons.camera_alt_rounded,
-          onPressed: () => controller.goTo(AppScreen.capture),
+          onPressed:
+              controller.collectorId.isEmpty ? null : controller.startPickup,
         ),
         const SizedBox(height: 10),
         SecondaryButton(
@@ -93,7 +110,9 @@ class HomeScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('🕒 ${controller.t('recent')}', style: const TextStyle(color: primary, fontWeight: FontWeight.w800)),
+                    Text('🕒 ${controller.t('recent')}',
+                        style: const TextStyle(
+                            color: primary, fontWeight: FontWeight.w800)),
                     TextButton(
                       onPressed: () => controller.goTo(AppScreen.ledger),
                       child: Text(controller.t('viewAll')),
@@ -106,16 +125,25 @@ class HomeScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(latest.lotId, style: const TextStyle(color: secondary, fontWeight: FontWeight.w800)),
-                          Text('${materials[latest.category]!.nameFor(controller.language)} • ${latest.weightKg} kg'),
+                          Text(latest.lotId,
+                              style: const TextStyle(
+                                  color: secondary,
+                                  fontWeight: FontWeight.w800)),
+                          Text(
+                              '${materials[latest.category]!.nameFor(controller.language)} • ${latest.weightKg} kg'),
                         ],
                       ),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(controller.formatCurrency(latest.formalPrice), style: const TextStyle(color: primary, fontSize: 17, fontWeight: FontWeight.w900)),
-                        Text(latest.timeLabel, style: Theme.of(context).textTheme.bodySmall),
+                        Text(controller.formatCurrency(latest.formalPrice),
+                            style: const TextStyle(
+                                color: primary,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900)),
+                        Text(latest.timeLabel,
+                            style: Theme.of(context).textTheme.bodySmall),
                       ],
                     ),
                   ],
@@ -130,7 +158,8 @@ class HomeScreen extends StatelessWidget {
 }
 
 class CaptureScreen extends StatelessWidget {
-  const CaptureScreen({required this.controller, required this.showMessage, super.key});
+  const CaptureScreen(
+      {required this.controller, required this.showMessage, super.key});
 
   final AppController controller;
   final void Function(String) showMessage;
@@ -144,7 +173,9 @@ class CaptureScreen extends StatelessWidget {
   Widget build(BuildContext context) => ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          ScreenHeading(title: controller.t('captureTitle'), subtitle: controller.t('captureSub')),
+          ScreenHeading(
+              title: controller.t('captureTitle'),
+              subtitle: controller.t('captureSub')),
           const SizedBox(height: 14),
           Stack(
             alignment: Alignment.center,
@@ -165,22 +196,28 @@ class CaptureScreen extends StatelessWidget {
                           Container(
                             width: 68,
                             height: 68,
-                            decoration: const BoxDecoration(color: primaryLight, shape: BoxShape.circle),
-                            child: const Icon(Icons.camera_alt_rounded, size: 32, color: primary),
+                            decoration: const BoxDecoration(
+                                color: primaryLight, shape: BoxShape.circle),
+                            child: const Icon(Icons.camera_alt_rounded,
+                                size: 32, color: primary),
                           ),
                           const SizedBox(height: 10),
-                          Text(controller.t('capturePrompt'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                          Text(controller.t('capturePrompt'),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w800)),
                           const SizedBox(height: 4),
-                          const Text('PNG, JPG or native camera', style: TextStyle(fontSize: 12, color: textMuted)),
+                          const Text('PNG, JPG or native camera',
+                              style: TextStyle(fontSize: 12, color: textMuted)),
                         ],
                       )
-                    : Image.memory(controller.capturedImage!, fit: BoxFit.cover),
+                    : Image.memory(controller.capturedImage!,
+                        fit: BoxFit.cover),
               ),
               if (controller.isScanning)
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(.74),
+                      color: Colors.black.withValues(alpha: .74),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Column(
@@ -188,9 +225,13 @@ class CaptureScreen extends StatelessWidget {
                       children: [
                         const CircularProgressIndicator(color: Colors.white),
                         const SizedBox(height: 14),
-                        Text(controller.t('scanning'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                        Text(controller.t('scanning'),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800)),
                         const SizedBox(height: 8),
-                        const Pill('Roboflow Model: e-waste-wjf5j/1', color: Color(0x66000000), textColor: Colors.white),
+                        const Pill('Roboflow Model: e-waste-wjf5j/1',
+                            color: Color(0x66000000), textColor: Colors.white),
                       ],
                     ),
                   ),
@@ -200,13 +241,34 @@ class CaptureScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: SecondaryButton(label: controller.t('camera'), icon: Icons.camera_alt_rounded, onPressed: () => _pick(ImageSource.camera, false))),
+              Expanded(
+                  child: SecondaryButton(
+                      label: controller.t('camera'),
+                      icon: Icons.camera_alt_rounded,
+                      onPressed: () => _pick(ImageSource.camera, false))),
               const SizedBox(width: 10),
-              Expanded(child: SecondaryButton(label: controller.t('gallery'), icon: Icons.photo_library_rounded, onPressed: () => _pick(ImageSource.gallery, false))),
+              Expanded(
+                  child: SecondaryButton(
+                      label: controller.t('gallery'),
+                      icon: Icons.photo_library_rounded,
+                      onPressed: () => _pick(ImageSource.gallery, false))),
             ],
           ),
           const SizedBox(height: 18),
-          Text('⚡ ${controller.t('samples')}', style: const TextStyle(color: textMuted, fontWeight: FontWeight.w800)),
+          TextField(
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: controller.t('weight'),
+              suffixText: 'kg',
+              prefixIcon: const Icon(Icons.scale_rounded),
+            ),
+            onChanged: (value) =>
+                controller.setWeight(double.tryParse(value) ?? 0),
+          ),
+          const SizedBox(height: 12),
+          Text('⚡ ${controller.t('samples')}',
+              style: const TextStyle(
+                  color: textMuted, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           GridView.count(
             crossAxisCount: 2,
@@ -218,16 +280,29 @@ class CaptureScreen extends StatelessWidget {
             children: ['pcb', 'battery', 'cables', 'motor'].map((id) {
               final item = materials[id]!;
               return InkWell(
-                onTap: controller.isScanning ? null : () => controller.selectSample(id),
+                onTap: controller.isScanning || controller.weightKg <= 0
+                    ? null
+                    : () => controller.selectSample(id),
                 borderRadius: BorderRadius.circular(14),
                 child: Ink(
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: border)),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: border)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(item.icon, style: const TextStyle(fontSize: 28)),
                       const SizedBox(width: 8),
-                      Flexible(child: Text(item.nameFor(controller.language).split(' (').first, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700))),
+                      Flexible(
+                          child: Text(
+                              item
+                                  .nameFor(controller.language)
+                                  .split(' (')
+                                  .first,
+                              style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700))),
                     ],
                   ),
                 ),

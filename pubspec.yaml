@@ -7,9 +7,13 @@ environment:
   sdk: ">=3.4.0 <4.0.0"
 
 dependencies:
+  connectivity_plus: ^6.1.4
   flutter:
     sdk: flutter
   flutter_tts: ^4.2.3
+  geolocator: ^13.0.2
+  http: ^1.2.2
+  http_parser: ^4.1.2
   image_picker: ^1.1.2
   qr_flutter: ^4.1.0
   shared_preferences: ^2.5.3
@@ -21,3 +25,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/branding/kabadiwala_connect_logo.png

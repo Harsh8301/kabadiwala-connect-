@@ -15,6 +15,7 @@ class MaterialItem {
     required this.icon,
     required this.formalRate,
     required this.informalRate,
+    required this.recoverableMinerals,
     required this.names,
     required this.valueTip,
     this.hazardType,
@@ -24,6 +25,7 @@ class MaterialItem {
   final String icon;
   final int formalRate;
   final int informalRate;
+  final List<String> recoverableMinerals;
   final String? hazardType;
   final Map<String, String> names;
   final ValueTip valueTip;
