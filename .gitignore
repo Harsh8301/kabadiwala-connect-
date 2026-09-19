@@ -1,11 +1,23 @@
+# Flutter / Dart
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
 build/
-coverage/
 android/.gradle/
 android/local.properties
 ios/Pods/
 ios/.symlinks/
 *.iml
+
+# Node / backend
+node_modules/
+.env
+.env.local
+.env.*
+!.env.example
+.vercel/
+npm-debug.log*
+
+# Shared
+coverage/

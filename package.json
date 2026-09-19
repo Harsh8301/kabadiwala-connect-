@@ -1,0 +1,15 @@
+{
+  "name": "kabadiwala-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node --check src/server.js && node --check api/detect.js && node --check api/detection/scrap.js && node --check api/health.js && node --check lib/detection-handler.js && node --check lib/multipart.js && node --check lib/roboflow.js && node --check tests/roboflow.test.js",
+    "test": "node tests/roboflow.test.js",
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "busboy": "^1.6.0",
+    "dotenv": "^17.4.2"
+  }
+}
