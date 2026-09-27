@@ -241,6 +241,7 @@ class _DetectionPhotoCard extends StatelessWidget {
         ? null
         : materialCatalog[result!.categoryId!];
     final confidence = ((result?.confidence ?? 0) * 100).round();
+    final deviceCategory = result?.categoryId?.startsWith('device_') ?? false;
     final possibleObject = result?.predictions
         .where((item) => item.categoryId == 'other' &&
             item.className.isNotEmpty && item.confidence >= .45)
@@ -284,6 +285,15 @@ class _DetectionPhotoCard extends StatelessWidget {
               Text(confidence >= 70
                   ? controller.t('verifyAi')
                   : controller.t('lowConfidence')),
+            ] else if (deviceCategory) ...[
+              DemoLabel(text: controller.t('categoryDetected')),
+              const SizedBox(height: 8),
+              Text(
+                '${result!.status == 'possible' ? controller.t('possibleObject') : controller.t('categoryDetected')}: ${result!.className ?? result!.categoryId} · $confidence%',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 4),
+              Text(controller.t('objectNotMaterial')),
             ] else if (result?.status == 'error')
               Text(result?.message ?? controller.t('detectionUnavailable'),
                   style: const TextStyle(fontWeight: FontWeight.w800))
