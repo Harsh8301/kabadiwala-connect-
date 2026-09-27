@@ -286,7 +286,7 @@ class _DetectionPhotoCard extends StatelessWidget {
                   : controller.t('lowConfidence')),
             ] else if (result?.status == 'error')
               Text(result?.message ?? controller.t('detectionUnavailable'),
-                  style: const TextStyle(fontWeight: FontWeight.w800)),
+                  style: const TextStyle(fontWeight: FontWeight.w800))
             else ...[
               if (possibleObject != null) ...[
                 Text(
