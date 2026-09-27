@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:kabadiwala_connect/app_controller.dart';
+import 'package:kabadiwala_connect/config/api_config.dart';
 import 'package:kabadiwala_connect/models/detection_result.dart';
 import 'package:kabadiwala_connect/services/detection_service.dart';
 
@@ -20,7 +21,7 @@ void main() {
   test('DetectionService parses normalized Roboflow response', () async {
     late http.Request receivedRequest;
     final service = DetectionService(
-      endpoint: 'http://example.test/api/detect',
+      endpoint: 'https://example.test/predict',
       client: MockClient((request) async {
         receivedRequest = request;
         return http.Response(
@@ -60,6 +61,17 @@ void main() {
     expect(result.categoryId, 'battery');
     expect(result.confidence, .91);
     expect(result.predictions.single.hasBox, isTrue);
+  });
+
+  test('production API URL requires an HTTPS backend origin', () {
+    expect(ApiConfig.predictionUrlFor('https://sample.vercel.app'),
+        'https://sample.vercel.app/predict');
+    expect(ApiConfig.predictionUrlFor('https://sample.vercel.app/'),
+        'https://sample.vercel.app/predict');
+    expect(ApiConfig.predictionUrlFor('http://sample.vercel.app'), isEmpty);
+    expect(ApiConfig.predictionUrlFor(''), isEmpty);
+    expect(
+        ApiConfig.predictionUrlFor('https://sample.vercel.app/other'), isEmpty);
   });
 
   test('DetectionService maps web cable id to Flutter cables id', () async {

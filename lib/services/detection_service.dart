@@ -17,11 +17,8 @@ class DetectionService {
   })  : _client = client ?? http.Client(),
         endpoint = endpoint ??
             (baseUrl == null
-                ? ApiConfig.scrapDetectionUrl
-                : _endpointFor(baseUrl));
-
-  static String _endpointFor(String baseUrl) =>
-      '${baseUrl.replaceFirst(RegExp(r'/+$'), '')}/api/detection/scrap';
+                ? ApiConfig.predictionUrl
+                : ApiConfig.predictionUrlFor(baseUrl));
 
   final http.Client _client;
   final String endpoint;
@@ -38,10 +35,10 @@ class DetectionService {
         'Choose a JPEG, PNG, or WebP image.',
       );
     }
-    if (imageBytes.length > 8 * 1024 * 1024) {
+    if (imageBytes.length > 4 * 1024 * 1024) {
       return DetectionResult.error(
         'FILE_TOO_LARGE',
-        'Choose an image smaller than 8 MB.',
+        'Choose an image smaller than 4 MB.',
       );
     }
 
@@ -49,7 +46,7 @@ class DetectionService {
     if (uri == null || !uri.hasScheme) {
       return DetectionResult.error(
         'INVALID_ENDPOINT',
-        'Detection endpoint is not configured correctly.',
+        'Build this app with an HTTPS Vercel backend URL.',
       );
     }
 

@@ -230,7 +230,7 @@ class CaptureScreen extends StatelessWidget {
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800)),
                         const SizedBox(height: 8),
-                        const Pill('Roboflow Model: e-waste-wjf5j/1',
+                        const Pill('AI-assisted material identification',
                             color: Color(0x66000000), textColor: Colors.white),
                       ],
                     ),

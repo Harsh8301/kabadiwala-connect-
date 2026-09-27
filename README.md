@@ -1,72 +1,112 @@
-# Kabadiwala Connect
+# Kabadiwala Connect Flutter app
 
-Kabadiwala Connect combines a multilingual Flutter collection and traceability
-app with a Node.js detection backend. The backend keeps the Roboflow credential
-off the mobile client and does not write uploaded images to disk.
+## Flutter Web on Vercel
 
-## Flutter app
+Import this Flutter repository as a separate Vercel project (Framework Preset:
+Other, Root Directory: `.`). The checked-in `vercel.json` builds the web app
+using `tool/build_web.sh` and serves the generated `build/web` directory.
+The web build calls `https://kabadiwala-backend-rho.vercel.app/predict`.
 
-The app supports collector onboarding, scrap-photo capture, AI-assisted material
-review, safety acknowledgements, price confirmation, recycler matching, QR
-handover, payment tracking, local persistence, and a lot ledger.
+After the web project has a production URL, add that exact origin to the
+backend Vercel project's `ALLOWED_ORIGINS` environment variable and redeploy
+the backend. Browser image uploads require this CORS setting. Test the web app
+with a real image after both deployments are ready.
 
-Run it against the local backend:
+Mobile-first, multilingual collection and traceability app for informal scrap
+collectors and formal recyclers. The active entry point is `lib/main.dart`,
+which starts `MinistryApp` and restores the saved collector session before
+showing onboarding or the dashboard.
 
-```powershell
-flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5001
-```
+## Main flow
 
-For a physical Android device, replace `10.0.2.2` with the development
-computer's LAN IPv4 address. Production builds must use an HTTPS backend.
+1. Onboard with a valid 10-digit Indian mobile number and select Marathi,
+   Hindi, or English.
+2. Capture a rear-camera photo or select a gallery image. The picker resizes and
+   compresses large images before upload and shows a preview immediately.
+3. The app posts the photo as multipart field `image` to the secure backend.
+4. The review UI shows the approximate AI suggestion, confidence, and any
+   bounding boxes. The collector confirms or changes the material.
+5. Battery and CRT require a localized, explicit safety acknowledgement.
+6. The confirmed material—not the original AI value—drives price, safety,
+   recycler matching, QR data, handover, payment, sync, and ledger records.
 
-## Detection backend
+The app never calls Roboflow directly and contains no Roboflow key.
 
-The backend exposes:
+## API configuration
 
-- `POST /api/detection/scrap` — accepts one JPEG, PNG, or WebP in multipart field
-  `image` (maximum 8 MB) and returns a normalized material suggestion.
-- `GET /api/health` — reports service health and whether Roboflow is configured.
-- `POST /api/detect` — backward-compatible detection alias.
-
-Copy `.env.example` to `.env` and provide the private configuration locally:
+One compile-time value controls the backend base URL:
 
 ```text
-PORT=5001
-ROBOFLOW_API_KEY=replace_with_private_key
-ROBOFLOW_PROJECT_ID=kabadiwala-scrap
-ROBOFLOW_MODEL_VERSION=1
-ROBOFLOW_CONFIDENCE_THRESHOLD=0.45
-ROBOFLOW_OVERLAP_THRESHOLD=0.30
-ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+API_BASE_URL
 ```
 
-Do not commit `.env` or place the Roboflow key in Flutter source. Start and test
-the backend with:
+The app appends `/predict` to this HTTPS origin. `lib/config/api_config.dart`
+rejects an empty, non-HTTPS, or path-bearing origin. Build the APK only after
+deploying the backend and configuring its Roboflow Environment Variables:
 
 ```powershell
-npm install
-npm test
-npm run build
-npm start
+.\tool\build_production_apk.ps1 -BackendUrl https://kabadiwala-backend.vercel.app
 ```
 
-Cloud inference requires internet access and valid model credentials. Empty,
-low-confidence, and unknown-only results are returned as uncertain and never
-default to PCB. The AI result is an approximate suggestion; it does not certify
-material composition, purity, weight, safety, or market value.
+The script checks the deployed `/health` endpoint and builds a release APK with
+the HTTPS origin embedded. It requires Node.js for the health check. The APK is
+distributed separately from Vercel.
 
-## Vercel deployment
+## Offline and error behavior
 
-Configure the Roboflow variables and `ALLOWED_ORIGINS` in Vercel for Preview and
-Production, then deploy from the repository root. `/api` contains the serverless
-entry points, while the local Node server shares the same handlers and validation.
+Roboflow cloud inference requires internet. Offline, timeout, invalid response,
+bad configuration, rate-limit, and server errors keep the selected photo
+visible and leave manual material selection available. Retry is available when
+online. Failed or uncertain inference never defaults to PCB. A newly selected
+single-item photo supersedes an older pending request; stale results are ignored.
+
+Only the scrap-identification photo is sent to the detection backend. Handover
+or witness images are not sent to Roboflow. Existing local lot storage remains
+part of the traceability product flow.
+
+## Localization, safety, and accessibility
+
+Safety headings, Battery/CRT-specific instructions, acknowledgement actions,
+offline fallback, phone errors, and AI status text come from the shared
+English/Hindi/Marathi map in `lib/data/ministry_data.dart`. Language changes
+rebuild an open warning immediately. Changing a selected material clears its
+prior safety acknowledgement.
+
+The onboarding number field uses a numeric keyboard, a 10-character limit, and
+a formatter that rejects—not silently cleans—letters, spaces, symbols, decimal
+points, negative signs, overlong input, and invalid pasted text. The Continue
+action stays disabled until exactly ten digits are present; controller-side
+validation enforces the same rule.
+
+The generated transparent logo is stored at
+`assets/branding/kabadiwala_connect_logo.png`. It is used responsively on the
+landing page and on a 1.6-second minimum animated in-app splash. The native
+Android launch background uses a resized transparent copy and the same cream
+background, avoiding a blank frame or visible logo rectangle.
 
 ## Verification
 
 ```powershell
-npm test
-npm run build
 flutter analyze
 flutter test
+.\tool\build_production_apk.ps1 -BackendUrl https://kabadiwala-backend.vercel.app
 ```
+
+Install the resulting APK on an Android device with internet access. Capture a
+known scrap item, confirm the suggestion and confidence, retry with a bad image,
+and verify manual selection after an error. A passing mock test alone does not
+prove the deployed model or device network path.
+
+The same Dart HTTP client can be checked against a labeled image on a computer:
+
+```powershell
+dart run tool/live_detection_smoke.dart PATH_TO_IMAGE EXPECTED_CATEGORY
+```
+
+This smoke test does not replace testing the installed APK on a device.
+
+Price and recycler records are clearly marked demo data, remote sync is
+simulated, and model accuracy depends on the deployed dataset and version.
+
+The AI result is an approximate suggestion. It does not certify material
+composition, purity, weight, safety or market value.
