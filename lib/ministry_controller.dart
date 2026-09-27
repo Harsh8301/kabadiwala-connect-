@@ -356,10 +356,6 @@ class MinistryController extends ChangeNotifier {
     if (added.isEmpty) return;
     if (online) {
       await detectImages(added, generation: generation);
-      if (collectionMode == CollectionMode.single &&
-          generation == _detectionGeneration) {
-        go(WorkflowScreen.review);
-      }
     } else {
       detectionMessage = t('detectionUnavailable');
       notifyListeners();
