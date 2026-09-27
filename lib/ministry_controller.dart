@@ -369,12 +369,17 @@ class MinistryController extends ChangeNotifier {
     detectionMessage = t('identifying');
     notifyListeners();
     var suggestions = 0;
+    var deviceMatches = 0;
     var errors = 0;
     for (final image in images) {
       final result = await detection.detect(image.bytes);
       if (requestGeneration != _detectionGeneration) return;
       detectionResults[image.id] = result;
       if (!result.success) errors++;
+      if (result.success &&
+          result.categoryId?.startsWith('device_') == true) {
+        deviceMatches++;
+      }
       final grouped = _groupDetection(result, image.id);
       if (grouped) suggestions++;
     }
@@ -383,7 +388,9 @@ class MinistryController extends ChangeNotifier {
     detectionMessage = suggestions == 0
         ? (errors == images.length
             ? t('detectionUnavailable')
-            : t('uncertainDetection'))
+            : deviceMatches > 0
+                ? t('deviceCategoryReady')
+                : t('uncertainDetection'))
         : '${t('aiSuggestion')}: $suggestions. ${t('verifyAi')}';
     notifyListeners();
   }
