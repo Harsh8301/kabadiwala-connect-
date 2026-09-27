@@ -163,6 +163,30 @@ void main() {
     expect(controller.draftMaterials.single.materialId, 'motor');
   });
 
+  test('device photo is categorized without assigning a material price',
+      () async {
+    final controller = controllerWith(SequenceDetectionService([
+      DetectionResult.fromJson({
+        'success': true,
+        'status': 'possible',
+        'categoryId': 'device_tablet',
+        'className': 'tablet',
+        'confidence': .53,
+        'predictions': <Object>[],
+        'image': {'width': 100, 'height': 100},
+      }),
+    ]));
+    addTearDown(controller.dispose);
+    final image = DraftImage(id: 'tablet', bytes: Uint8List(1), source: 'test');
+
+    await controller.detectImages([image]);
+
+    expect(controller.detectionResults[image.id]?.categoryId, 'device_tablet');
+    expect(controller.detectionMessage, mt('mr', 'deviceCategoryReady'));
+    expect(controller.draftMaterials, isEmpty);
+    expect(controller.draftValue, 0);
+  });
+
   test('loading state is visible and a newer request supersedes the old one',
       () async {
     final service = DeferredDetectionService();
