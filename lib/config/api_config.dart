@@ -3,9 +3,22 @@ class ApiConfig {
 
   static const baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:5001',
+    defaultValue: 'https://kabadiwala-backend.vercel.app',
   );
 
-  static String get scrapDetectionUrl =>
-      '${baseUrl.replaceFirst(RegExp(r'/+$'), '')}/api/detection/scrap';
+  static String get predictionUrl => predictionUrlFor(baseUrl);
+
+  static String predictionUrlFor(String backendUrl) {
+    final uri = Uri.tryParse(backendUrl);
+    if (uri == null ||
+        uri.scheme != 'https' ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        uri.hasQuery ||
+        uri.hasFragment ||
+        (uri.path.isNotEmpty && uri.path != '/')) {
+      return '';
+    }
+    return uri.replace(path: '/predict').toString();
+  }
 }

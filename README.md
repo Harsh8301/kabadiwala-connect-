@@ -28,42 +28,17 @@ One compile-time value controls the backend base URL:
 API_BASE_URL
 ```
 
-The app appends `/api/detection/scrap`. Defaults and examples:
+The app appends `/predict` to this HTTPS origin. `lib/config/api_config.dart`
+rejects an empty, non-HTTPS, or path-bearing origin. Build the APK only after
+deploying the backend and configuring its Roboflow Environment Variables:
 
 ```powershell
-# Android emulator (default)
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5001
-
-# Physical Android device on the same Wi-Fi network
-flutter run --dart-define=API_BASE_URL=http://LAPTOP_IPV4_ADDRESS:5001
-
-# Production
-flutter run --release `
-  --dart-define=API_BASE_URL=https://DEPLOYED_BACKEND_DOMAIN
+.\tool\build_production_apk.ps1 -BackendUrl https://kabadiwala-backend.vercel.app
 ```
 
-For a physical device, bind the local development server to an address reachable
-on the LAN, permit the chosen port in the firewall, and use the laptop's IPv4
-address. Production builds must use an HTTPS backend and must not point to
-localhost.
-
-## Local setup
-
-Start the backend first:
-
-```powershell
-cd ..\kabadiwala-backend
-npm install
-npx vercel dev --local --listen 5001
-```
-
-Then run the app:
-
-```powershell
-cd ..\kabadiwala-flutter
-flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5001
-```
+The script checks the deployed `/health` endpoint and builds a release APK with
+the HTTPS origin embedded. It requires Node.js for the health check. The APK is
+distributed separately from Vercel.
 
 ## Offline and error behavior
 
@@ -100,19 +75,26 @@ background, avoiding a blank frame or visible logo rectangle.
 ## Verification
 
 ```powershell
-dart format .
 flutter analyze
 flutter test
-flutter build web --no-wasm-dry-run `
-  --dart-define=API_BASE_URL=https://DEPLOYED_BACKEND_DOMAIN
-flutter build apk --debug `
-  --dart-define=API_BASE_URL=http://10.0.2.2:5001
+.\tool\build_production_apk.ps1 -BackendUrl https://kabadiwala-backend.vercel.app
 ```
 
-Live end-to-end inference cannot be verified until the private key is added to
-the backend environment. Price and recycler records are clearly marked demo
-data, remote sync is simulated, and model accuracy depends on the deployed
-dataset and version.
+Install the resulting APK on an Android device with internet access. Capture a
+known scrap item, confirm the suggestion and confidence, retry with a bad image,
+and verify manual selection after an error. A passing mock test alone does not
+prove the deployed model or device network path.
+
+The same Dart HTTP client can be checked against a labeled image on a computer:
+
+```powershell
+dart run tool/live_detection_smoke.dart PATH_TO_IMAGE EXPECTED_CATEGORY
+```
+
+This smoke test does not replace testing the installed APK on a device.
+
+Price and recycler records are clearly marked demo data, remote sync is
+simulated, and model accuracy depends on the deployed dataset and version.
 
 The AI result is an approximate suggestion. It does not certify material
 composition, purity, weight, safety or market value.
