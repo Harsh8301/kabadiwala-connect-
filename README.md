@@ -1,5 +1,17 @@
 # Kabadiwala Connect Flutter app
 
+## Flutter Web on Vercel
+
+Import this Flutter repository as a separate Vercel project (Framework Preset:
+Other, Root Directory: `.`). The checked-in `vercel.json` builds the web app
+using `tool/build_web.sh` and serves the generated `build/web` directory.
+The web build calls `https://kabadiwala-backend.vercel.app/predict`.
+
+After the web project has a production URL, add that exact origin to the
+backend Vercel project's `ALLOWED_ORIGINS` environment variable and redeploy
+the backend. Browser image uploads require this CORS setting. Test the web app
+with a real image after both deployments are ready.
+
 Mobile-first, multilingual collection and traceability app for informal scrap
 collectors and formal recyclers. The active entry point is `lib/main.dart`,
 which starts `MinistryApp` and restores the saved collector session before
