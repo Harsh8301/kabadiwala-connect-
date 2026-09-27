@@ -275,6 +275,8 @@ const ministryText = <String, Map<String, String>>{
     'detectionPrivacy':
         'Only this scrap photo is sent for approximate identification.',
     'retryDetection': 'Retry identification',
+    'possibleObject': 'Possible object',
+    'objectNotMaterial': 'The model recognized an object, but cannot determine its recyclable material.',
     'retakePhoto': 'Retake photo',
     'uncertainDetection':
         'No reliable match was found. Select the material manually.',
@@ -370,6 +372,8 @@ const ministryText = <String, Map<String, String>>{
     'detectionPrivacy':
         'अनुमानित पहचान के लिए केवल यह कबाड़ फोटो भेजी जाती है।',
     'retryDetection': 'पहचान फिर करें',
+    'possibleObject': 'संभावित वस्तु',
+    'objectNotMaterial': 'मॉडल ने वस्तु पहचानी है, लेकिन उसकी रीसाइक्लिंग सामग्री तय नहीं कर सकता।',
     'retakePhoto': 'नई फोटो लें',
     'uncertainDetection': 'विश्वसनीय परिणाम नहीं मिला। सामग्री खुद चुनें।',
     'verifyAi': 'एआई परिणाम केवल अनुमानित सुझाव है। सामग्री की पुष्टि करें।',
@@ -463,6 +467,8 @@ const ministryText = <String, Map<String, String>>{
     'detectionPrivacy':
         'अंदाजे ओळख करण्यासाठी फक्त हा भंगाराचा फोटो पाठवला जातो.',
     'retryDetection': 'पुन्हा ओळखा',
+    'possibleObject': 'संभाव्य वस्तू',
+    'objectNotMaterial': 'मॉडेलने वस्तू ओळखली, पण तिचे पुनर्वापरयोग्य साहित्य ठरवता आले नाही.',
     'retakePhoto': 'नवीन फोटो घ्या',
     'uncertainDetection': 'विश्वसनीय जुळणी मिळाली नाही. साहित्य स्वतः निवडा.',
     'verifyAi': 'एआय निकाल हा फक्त अंदाजे सल्ला आहे. साहित्याची पुष्टी करा.',
