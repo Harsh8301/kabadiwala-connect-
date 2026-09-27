@@ -5,7 +5,7 @@
 Import this Flutter repository as a separate Vercel project (Framework Preset:
 Other, Root Directory: `.`). The checked-in `vercel.json` builds the web app
 using `tool/build_web.sh` and serves the generated `build/web` directory.
-The web build calls `https://kabadiwala-backend.vercel.app/predict`.
+The web build calls `https://kabadiwala-backend-rho.vercel.app/predict`.
 
 After the web project has a production URL, add that exact origin to the
 backend Vercel project's `ALLOWED_ORIGINS` environment variable and redeploy
