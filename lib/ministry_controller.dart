@@ -373,17 +373,21 @@ class MinistryController extends ChangeNotifier {
     detectionMessage = t('identifying');
     notifyListeners();
     var suggestions = 0;
+    var errors = 0;
     for (final image in images) {
       final result = await detection.detect(image.bytes);
       if (requestGeneration != _detectionGeneration) return;
       detectionResults[image.id] = result;
+      if (!result.success) errors++;
       final grouped = _groupDetection(result, image.id);
       if (grouped) suggestions++;
     }
     if (requestGeneration != _detectionGeneration) return;
     detecting = false;
     detectionMessage = suggestions == 0
-        ? t('uncertainDetection')
+        ? (errors == images.length
+            ? t('detectionUnavailable')
+            : t('uncertainDetection'))
         : '${t('aiSuggestion')}: $suggestions. ${t('verifyAi')}';
     notifyListeners();
   }
