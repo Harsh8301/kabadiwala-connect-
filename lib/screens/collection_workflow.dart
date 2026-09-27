@@ -241,6 +241,11 @@ class _DetectionPhotoCard extends StatelessWidget {
         ? null
         : materialCatalog[result!.categoryId!];
     final confidence = ((result?.confidence ?? 0) * 100).round();
+    final possibleObject = result?.predictions
+        .where((item) => item.categoryId == 'other' &&
+            item.className.isNotEmpty && item.confidence >= .45)
+        .fold<DetectionBox?>(null, (best, item) =>
+            best == null || item.confidence > best.confidence ? item : best);
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -279,9 +284,22 @@ class _DetectionPhotoCard extends StatelessWidget {
               Text(confidence >= 70
                   ? controller.t('verifyAi')
                   : controller.t('lowConfidence')),
-            ] else
+            ] else if (result?.status == 'error')
+              Text(result?.message ?? controller.t('detectionUnavailable'),
+                  style: const TextStyle(fontWeight: FontWeight.w800)),
+            else ...[
+              if (possibleObject != null) ...[
+                Text(
+                    '${controller.t('possibleObject')}: ${possibleObject.className} · ${(possibleObject.confidence * 100).round()}%',
+                    style: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 4),
+                Text(controller.t('objectNotMaterial')),
+                const SizedBox(height: 4),
+              ],
               Text(controller.t('uncertainDetection'),
                   style: const TextStyle(fontWeight: FontWeight.w800)),
+            ],
             const SizedBox(height: 8),
             Text(controller.t('detectionPrivacy'),
                 style: const TextStyle(fontSize: 12, color: textMuted)),
