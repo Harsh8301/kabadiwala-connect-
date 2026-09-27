@@ -16,13 +16,13 @@ class CollectionModeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           PageHeading(controller.t('chooseMode'),
-              'Batch collection is recommended for day-to-day work.'),
+              controller.t('batchRecommended')),
           const SizedBox(height: 16),
           _ChoiceCard(
             icon: Icons.collections_rounded,
             title: controller.t('batch'),
             subtitle: controller.t('batchSub'),
-            badge: 'Recommended',
+            badge: controller.t('recommended'),
             onTap: () => controller.startCollection(CollectionMode.batch),
           ),
           const SizedBox(height: 10),
@@ -120,8 +120,8 @@ class CaptureBatchScreen extends StatelessWidget {
                 ? controller.t('batch')
                 : controller.t('single'),
             controller.collectionMode == CollectionMode.batch
-                ? 'Add up to 8 compressed photos. Similar suggestions are grouped.'
-                : 'Capture one item, then add its details.',
+                ? controller.t('batchCaptureSub')
+                : controller.t('singleCaptureSub'),
           ),
           const SizedBox(height: 12),
           if (controller.draftImages.isEmpty)
@@ -132,12 +132,12 @@ class CaptureBatchScreen extends StatelessWidget {
                   color: Colors.white,
                   border: Border.all(color: border),
                   borderRadius: BorderRadius.circular(8)),
-              child: const Column(mainAxisSize: MainAxisSize.min, children: [
-                Icon(Icons.add_photo_alternate_rounded,
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.add_photo_alternate_rounded,
                     size: 52, color: primary),
-                SizedBox(height: 8),
-                Text('Photos stay available for the local draft.',
-                    style: TextStyle(color: textMuted)),
+                const SizedBox(height: 8),
+                Text(controller.t('photosStayAvailable'),
+                    style: const TextStyle(color: textMuted)),
               ]),
             )
           else
@@ -249,7 +249,7 @@ class _DetectionPhotoCard extends StatelessWidget {
           width: double.infinity,
           child: Stack(fit: StackFit.expand, children: [
             ColoredBox(
-              color: const Color(0xFF17211C),
+              color: primaryDark,
               child: Image.memory(image.bytes,
                   fit: BoxFit.contain, cacheWidth: 900),
             ),
@@ -281,7 +281,7 @@ class _DetectionPhotoCard extends StatelessWidget {
                   : controller.t('lowConfidence')),
             ] else
               Text(controller.t('uncertainDetection'),
-                  style: const TextStyle(fontWeight: FontWeight.w800)),
+                style: const TextStyle(fontWeight: FontWeight.w800)),
             const SizedBox(height: 8),
             Text(controller.t('detectionPrivacy'),
                 style: const TextStyle(fontSize: 12, color: textMuted)),
@@ -317,7 +317,7 @@ class _DetectionBoxPainter extends CustomPainter {
     final dx = (size.width - drawnWidth) / 2;
     final dy = (size.height - drawnHeight) / 2;
     final paint = Paint()
-      ..color = const Color(0xFFFFB547)
+      ..color = secondary
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke;
     for (final box in result.predictions.where((item) => item.hasBox).take(8)) {
@@ -347,7 +347,7 @@ class MaterialReviewScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           PageHeading(controller.t('reviewMaterials'),
-              'Confirm AI suggestions, quantity and material-wise weight.'),
+              controller.t('reviewHeadingSub')),
           const SizedBox(height: 12),
           for (var index = 0;
               index < controller.draftMaterials.length;
@@ -377,8 +377,8 @@ class MaterialReviewScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Collection location',
-                      style: TextStyle(fontWeight: FontWeight.w900)),
+                  Text(controller.t('collectionLocation'),
+                      style: const TextStyle(fontWeight: FontWeight.w900)),
                   const SizedBox(height: 4),
                   Text(controller.collectionLocation.label,
                       style: const TextStyle(color: textMuted)),
@@ -391,7 +391,7 @@ class MaterialReviewScreen extends StatelessWidget {
                             : controller.requestLocation,
                         icon: const Icon(Icons.my_location_rounded),
                         label: Text(
-                            controller.locating ? 'Locating...' : 'Use GPS'),
+                            controller.locating ? controller.t('locating') : controller.t('useGps')),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -399,7 +399,7 @@ class MaterialReviewScreen extends StatelessWidget {
                       child: OutlinedButton.icon(
                         onPressed: controller.useDemoLocation,
                         icon: const Icon(Icons.science_outlined),
-                        label: const Text('Demo location'),
+                        label: Text(controller.t('demoLocation')),
                       ),
                     ),
                   ]),
@@ -417,7 +417,7 @@ class MaterialReviewScreen extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8),
               child: Text(
                   controller.draftMaterials.any((item) => item.weightKg <= 0)
-                      ? 'Every material needs a weight greater than zero.'
+                      ? controller.t('weightZeroError')
                       : controller.t('safetyRequired'),
                   style: const TextStyle(
                       color: danger, fontWeight: FontWeight.w700)),
@@ -460,7 +460,7 @@ class _MaterialEditor extends StatelessWidget {
                   ]),
             ),
             IconButton(
-                tooltip: 'Remove material',
+                tooltip: controller.t('removeMaterial'),
                 onPressed: () => controller.removeMaterial(index),
                 icon: const Icon(Icons.delete_outline_rounded, color: danger)),
           ]),
@@ -536,7 +536,12 @@ class _MaterialEditor extends StatelessWidget {
                 labelText: controller.t('condition'), isDense: true),
             items: const ['mixed', 'intact', 'damaged', 'sorted']
                 .map((value) =>
-                    DropdownMenuItem(value: value, child: Text(value)))
+                    DropdownMenuItem(value: value, child: Text(switch (value) {
+                      'intact' => controller.t('conditionIntact'),
+                      'damaged' => controller.t('conditionDamaged'),
+                      'sorted' => controller.t('conditionSorted'),
+                      _ => controller.t('conditionMixed'),
+                    })))
                 .toList(),
             onChanged: (value) =>
                 controller.updateMaterial(index, condition: value),
@@ -573,7 +578,7 @@ class _MaterialEditor extends StatelessWidget {
             ),
           const Divider(),
           LabelValue(
-              'Reference rate', '${controller.money(price.buyingPrice)} / kg'),
+              controller.t('referenceRate'), '${controller.money(price.buyingPrice)} / kg'),
           LabelValue(controller.t('estimatedValue'),
               controller.money(item.estimatedValue),
               strong: true),

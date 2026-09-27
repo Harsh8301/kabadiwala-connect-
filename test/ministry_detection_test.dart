@@ -12,10 +12,14 @@ import 'package:kabadiwala_connect/services/detection_service.dart';
 
 class MemoryRepository implements LocalRepository {
   CollectorProfile? profile;
+  RecyclerProfile? recyclerProfile;
   List<DigitalLot> lots = [];
 
   @override
-  Future<void> clearProfile() async => profile = null;
+  Future<void> clearProfile() async {
+    profile = null;
+    recyclerProfile = null;
+  }
   @override
   Future<DateTime?> loadLastSync() async => null;
   @override
@@ -23,11 +27,15 @@ class MemoryRepository implements LocalRepository {
   @override
   Future<CollectorProfile?> loadProfile() async => profile;
   @override
+  Future<RecyclerProfile?> loadRecyclerProfile() async => recyclerProfile;
+  @override
   Future<void> saveLastSync(DateTime value) async {}
   @override
   Future<void> saveLots(List<DigitalLot> value) async => lots = [...value];
   @override
   Future<void> saveProfile(CollectorProfile value) async => profile = value;
+  @override
+  Future<void> saveRecyclerProfile(RecyclerProfile value) async => recyclerProfile = value;
 }
 
 class NoopRemote implements RemoteRepository {
@@ -117,11 +125,11 @@ void main() {
       '123 4567890',
       'abcdefghij'
     ]) {
-      await controller.saveProfile(invalid, 'Pune');
+      await controller.saveProfile(invalid, 'Pune', UserRole.collector);
       expect(controller.profile, isNull);
       expect(controller.lastError, mt('mr', 'phoneError'));
     }
-    await controller.saveProfile('55555', 'Pune');
+    await controller.saveProfile('55555', 'Pune', UserRole.collector);
     expect(controller.profile?.collectorId, '55555');
   });
 
@@ -183,7 +191,7 @@ void main() {
     final controller =
         controllerWith(SequenceDetectionService([detected('battery', .9)]));
     addTearDown(controller.dispose);
-    await controller.saveProfile('9876543210', 'Pune');
+    await controller.saveProfile('9876543210', 'Pune', UserRole.collector);
     controller.addManualMaterial('battery');
     controller.updateMaterial(0, weightKg: 1);
     expect(controller.canCreateLot, isFalse);
@@ -213,8 +221,8 @@ void main() {
     expect(controller.draftMaterials.single.materialId, 'motor');
   });
 
-  test('all safety copy changes with English Hindi and Marathi', () {
-    for (final language in ['en', 'hi', 'mr']) {
+  test('all safety copy changes with English, Hindi, Marathi, Kannada, Telugu, Bengali', () {
+    for (final language in ['en', 'hi', 'mr', 'kn', 'te', 'bn']) {
       for (final key in [
         'safetyTitle',
         'batteryWarningTitle',
@@ -232,5 +240,11 @@ void main() {
     expect(mt('hi', 'batteryWarningTitle'),
         isNot(mt('en', 'batteryWarningTitle')));
     expect(mt('mr', 'crtWarningTitle'), isNot(mt('en', 'crtWarningTitle')));
+    expect(mt('kn', 'batteryWarningTitle'),
+        isNot(mt('en', 'batteryWarningTitle')));
+    expect(mt('te', 'batteryWarningTitle'),
+        isNot(mt('en', 'batteryWarningTitle')));
+    expect(mt('bn', 'batteryWarningTitle'),
+        isNot(mt('en', 'batteryWarningTitle')));
   });
 }

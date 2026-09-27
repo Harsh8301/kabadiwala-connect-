@@ -34,7 +34,7 @@ class LotScreen extends StatelessWidget {
               subtitle: controller.t('lotSub')),
           const SizedBox(height: 14),
           AppCard(
-            borderColor: const Color(0xFFA7D7AA),
+            borderColor: border,
             child: Column(
               children: [
                 Row(
@@ -46,8 +46,8 @@ class LotScreen extends StatelessWidget {
                                 fontFamily: 'monospace',
                                 fontWeight: FontWeight.w900))),
                     Pill(controller.t('awaiting'),
-                        color: const Color(0xFFFEF3C7),
-                        textColor: const Color(0xFF92400E)),
+                        color: saffronLight,
+                        textColor: saffronDark),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -207,8 +207,8 @@ class RecyclerMatchScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodySmall),
                   const SizedBox(height: 6),
                   Pill('Authorized status: ${recycler.authorizationStatus}',
-                      color: const Color(0xFFFEF3C7),
-                      textColor: const Color(0xFF92400E)),
+                      color: saffronLight,
+                      textColor: saffronDark),
                   const SizedBox(height: 8),
                   Text(recycler.authorizationDetails,
                       style: Theme.of(context).textTheme.bodySmall),
@@ -338,7 +338,7 @@ class _SampleWitness extends StatelessWidget {
   const _SampleWitness();
   @override
   Widget build(BuildContext context) => Container(
-        color: const Color(0xFF0F766E),
+        color: primary,
         alignment: Alignment.center,
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -346,7 +346,7 @@ class _SampleWitness extends StatelessWidget {
             Text('🙂', style: TextStyle(fontSize: 46)),
             SizedBox(height: 5),
             Pill('✓ Handover Verified',
-                color: Colors.white, textColor: Color(0xFF0F766E)),
+                color: Colors.white, textColor: primary),
           ],
         ),
       );
@@ -390,8 +390,8 @@ class LedgerScreen extends StatelessWidget {
         if (latest != null) ...[
           const SizedBox(height: 14),
           AppCard(
-            color: const Color(0xFFECFDF5),
-            borderColor: const Color(0xFFA7F3D0),
+            color: primaryLight,
+            borderColor: border,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -490,10 +490,10 @@ class LedgerScreen extends StatelessWidget {
                           record.paymentStatus,
                           color: record.paymentStatus == 'Paid'
                               ? primaryLight
-                              : const Color(0xFFFEF3C7),
+                              : saffronLight,
                           textColor: record.paymentStatus == 'Paid'
                               ? primary
-                              : const Color(0xFF92400E),
+                              : saffronDark,
                         ),
                         Text(controller.formatCurrency(record.formalPrice),
                             style: const TextStyle(

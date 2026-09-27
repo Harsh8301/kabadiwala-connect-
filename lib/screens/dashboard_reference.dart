@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import '../data/ministry_data.dart';
 import '../ministry_controller.dart';
 import '../models/workflow_models.dart';
-import '../services/workflow_services.dart';
 import '../widgets/common.dart' hide LabelValue;
 import '../widgets/ministry_components.dart';
 
@@ -53,8 +52,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(height: 8),
             for (final option in const [
               ('en', 'English'),
-              ('mr', 'मराठी'),
               ('hi', 'हिन्दी'),
+              ('mr', 'मराठी'),
+              ('kn', 'ಕನ್ನಡ'),
+              ('te', 'తెలుగు'),
+              ('bn', 'বাংলা'),
             ])
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 4),
@@ -106,25 +108,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Who are you?', style: Theme.of(context).textTheme.headlineSmall),
+        Text(c.t('whoAreYou'), style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 16),
         _RoleCard(
-          title: 'Collector / Kabadiwala',
-          subtitle: 'Individual scrap collector',
+          title: c.t('roleCollector'),
+          subtitle: c.t('roleCollectorSub'),
           icon: Icons.person_rounded,
           onTap: () => setState(() => selectedRole = UserRole.collector),
         ),
         const SizedBox(height: 12),
         _RoleCard(
-          title: 'Small Aggregator',
-          subtitle: 'Consolidate scrap from multiple collectors',
+          title: c.t('roleAggregator'),
+          subtitle: c.t('roleAggregatorSub'),
           icon: Icons.store_rounded,
           onTap: () => setState(() => selectedRole = UserRole.aggregator),
         ),
         const SizedBox(height: 12),
         _RoleCard(
-          title: 'Authorized Recycler',
-          subtitle: 'Registered facility',
+          title: c.t('roleRecycler'),
+          subtitle: c.t('roleRecyclerSub'),
           icon: Icons.factory_rounded,
           onTap: () => setState(() => selectedRole = UserRole.recycler),
         ),
@@ -203,26 +205,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Recycler Registration', style: Theme.of(context).textTheme.headlineSmall),
+        Text(c.t('recyclerRegTitle'), style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 6),
-        const Text('Enter authorized facility details.'),
+        Text(c.t('recyclerRegSub')),
         const SizedBox(height: 22),
         TextField(
           controller: facilityName,
           textCapitalization: TextCapitalization.words,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            labelText: 'Facility Name',
+            labelText: c.t('facilityName'),
             prefixIcon: const Icon(Icons.factory_rounded),
-            errorText: attempted && facilityName.text.isEmpty ? 'Required' : null,
+            errorText: attempted && facilityName.text.isEmpty ? c.t('required') : null,
           ),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: facilityLocation,
-          decoration: const InputDecoration(
-            labelText: 'Facility Location',
-            prefixIcon: Icon(Icons.location_city_rounded),
+          decoration: InputDecoration(
+            labelText: c.t('facilityLocation'),
+            prefixIcon: const Icon(Icons.location_city_rounded),
           ),
         ),
         const SizedBox(height: 12),
@@ -230,9 +232,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           controller: authNumber,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
-            labelText: 'Authorization Number',
+            labelText: c.t('authNumber'),
             prefixIcon: const Icon(Icons.verified_user_rounded),
-            errorText: attempted && authNumber.text.isEmpty ? 'Required' : null,
+            errorText: attempted && authNumber.text.isEmpty ? c.t('required') : null,
           ),
         ),
         if (c.lastError.isNotEmpty) ...[
@@ -242,7 +244,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ],
         const SizedBox(height: 16),
         PrimaryButton(
-          label: 'Register Facility',
+          label: c.t('registerFacility'),
           icon: Icons.arrow_forward_rounded,
           onPressed: validFacility
               ? () => c.saveRecyclerProfile(facilityName.text, facilityLocation.text, authNumber.text, ['All'])
@@ -275,12 +277,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             right: 0,
             top: 0,
             child: IconButton.filledTonal(
-              tooltip: 'Language',
+              tooltip: c.t('language'),
               onPressed: _showLanguageSelector,
               style: IconButton.styleFrom(
                 foregroundColor: primaryDark,
                 backgroundColor: primaryLight,
-                side: const BorderSide(color: Color(0xFFCFE2D2)),
+                side: const BorderSide(color: border),
               ),
               icon: const Icon(Icons.language_rounded),
             ),
@@ -288,7 +290,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ]),
       ),
       const SizedBox(height: 8),
-      Text(c.t('formalRecycling'),
+      Text(c.t('onboardingTitle'),
           textAlign: TextAlign.center,
           style:
               const TextStyle(color: textMuted, fontWeight: FontWeight.w700)),
@@ -304,7 +306,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         const SizedBox(height: 16),
         TextButton(
           onPressed: () => setState(() => selectedRole = null),
-          child: const Text('Back to Role Selection'),
+          child: Text(c.t('backToRole')),
         ),
       ],
       const SizedBox(height: 20),
@@ -342,7 +344,7 @@ class _RoleCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: const BoxDecoration(
-                color: Color(0xFFEAF8ED),
+                color: primaryLight,
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: primaryDark, size: 28),
@@ -420,8 +422,8 @@ class HomeDashboard extends StatelessWidget {
                       caption:
                           _homeCopy(controller.language, 'collectionValue'),
                       icon: Icons.currency_rupee_rounded,
-                      tint: const Color(0xFFEAF8ED),
-                      accent: const Color(0xFF138347),
+                      tint: primaryLight,
+                      accent: primary,
                       onTap: _openLedger,
                     ),
                   ),
@@ -432,8 +434,8 @@ class HomeDashboard extends StatelessWidget {
                       value: controller.money(controller.pendingEarnings),
                       caption: _homeCopy(controller.language, 'settlement'),
                       icon: Icons.schedule_rounded,
-                      tint: const Color(0xFFFFF5DF),
-                      accent: const Color(0xFFD59422),
+                      tint: saffronLight,
+                      accent: secondary,
                       onTap: _openPending,
                     ),
                   ),
@@ -444,8 +446,8 @@ class HomeDashboard extends StatelessWidget {
                       value: '${controller.lots.length}',
                       caption: _homeCopy(controller.language, 'lotsCreated'),
                       icon: Icons.inventory_2_rounded,
-                      tint: const Color(0xFFEAF7FC),
-                      accent: const Color(0xFF1687B4),
+                      tint: accentLight,
+                      accent: accent,
                       onTap: _openLedger,
                     ),
                   ),
@@ -497,24 +499,24 @@ class HomeDashboard extends StatelessWidget {
                     label: controller.t('priceBoard'),
                     subtitle: _homeCopy(controller.language, 'latestRates'),
                     icon: Icons.trending_up_rounded,
-                    iconBackground: const Color(0xFFE4F6E9),
-                    iconColor: const Color(0xFF08783C),
+                    iconBackground: primaryLight,
+                    iconColor: primary,
                     onTap: () => controller.go(WorkflowScreen.priceBoard),
                   ),
                   _QuickActionCard(
                     label: controller.t('myLots'),
                     subtitle: _homeCopy(controller.language, 'viewManage'),
                     icon: Icons.inventory_2_rounded,
-                    iconBackground: const Color(0xFFEAF8ED),
-                    iconColor: const Color(0xFF176B3A),
+                    iconBackground: saffronLight,
+                    iconColor: secondary,
                     onTap: _openLedger,
                   ),
                   _QuickActionCard(
-                    label: 'Schemes',
-                    subtitle: 'EPR & Formalization',
+                    label: controller.t('schemes'),
+                    subtitle: controller.t('schemesSub'),
                     icon: Icons.account_balance_rounded,
-                    iconBackground: const Color(0xFFFFEDE2),
-                    iconColor: const Color(0xFFB65E20),
+                    iconBackground: accentLight,
+                    iconColor: accent,
                     onTap: () => controller.go(WorkflowScreen.schemes),
                   ),
                   _QuickActionCard(
@@ -525,8 +527,8 @@ class HomeDashboard extends StatelessWidget {
                         : (controller.online
                             ? Icons.sync_rounded
                             : Icons.cloud_off_rounded),
-                    iconBackground: const Color(0xFFE0F4FC),
-                    iconColor: const Color(0xFF087CA9),
+                    iconBackground: primaryLight,
+                    iconColor: primary,
                     count: controller.pendingSyncCount,
                     onTap: () => controller.go(WorkflowScreen.sync),
                   ),
@@ -535,14 +537,14 @@ class HomeDashboard extends StatelessWidget {
                     label: controller.t('earnings'),
                     subtitle: _homeCopy(controller.language, 'incomeDetails'),
                     icon: Icons.account_balance_wallet_rounded,
-                    iconBackground: const Color(0xFFE5F6E8),
-                    iconColor: const Color(0xFF075E32),
+                    iconBackground: saffronLight,
+                    iconColor: secondary,
                     onTap: _openLedger,
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-              const _MinistryAlignmentCard(),
+              _MinistryAlignmentCard(controller: controller),
             ],
           );
         }),
@@ -552,6 +554,9 @@ class HomeDashboard extends StatelessWidget {
 String _greeting(String language) => switch (language) {
       'hi' => 'नमस्ते',
       'mr' => 'नमस्कार',
+      'kn' => 'ನಮಸ್ಕಾರ',
+      'te' => 'నమస్కారం',
+      'bn' => 'নমস্কার',
       _ => 'Welcome',
     };
 
@@ -577,8 +582,11 @@ class _HomeHeader extends StatelessWidget {
             const SizedBox(height: 8),
             for (final option in const [
               ('en', 'English'),
-              ('mr', 'मराठी'),
               ('hi', 'हिन्दी'),
+              ('mr', 'मराठी'),
+              ('kn', 'ಕನ್ನಡ'),
+              ('te', 'తెలుగు'),
+              ('bn', 'বাংলা'),
             ])
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 4),
@@ -621,20 +629,20 @@ class _HomeHeader extends StatelessWidget {
                 EdgeInsets.symmetric(horizontal: compact ? 9 : 12, vertical: 8),
             decoration: BoxDecoration(
               color: controller.online
-                  ? const Color(0xFFEAF8ED)
-                  : const Color(0xFFFFF3E4),
+                  ? primaryLight
+                  : saffronLight,
               borderRadius: BorderRadius.circular(999),
               border: Border.all(
                   color: controller.online
-                      ? const Color(0xFFCFEAD4)
-                      : const Color(0xFFF0D0A6)),
+                      ? border
+                      : const Color(0xFFFCD34D)),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Container(
                 width: 10,
                 height: 10,
                 decoration: BoxDecoration(
-                  color: controller.online ? const Color(0xFF159447) : warning,
+                  color: controller.online ? primary : secondary,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -650,12 +658,12 @@ class _HomeHeader extends StatelessWidget {
           ),
         ),
         IconButton.filledTonal(
-          tooltip: 'Language',
+          tooltip: controller.t('language'),
           onPressed: () => _showLanguageSelector(context),
           style: IconButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: primaryDark,
-              side: const BorderSide(color: Color(0xFFE2ECE3))),
+              side: const BorderSide(color: border)),
           icon: const Icon(Icons.language_rounded),
         ),
       ]);
@@ -675,10 +683,11 @@ class _WelcomeHero extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(18, 18, 16, 16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFF4FAE9), Color(0xFFE1F4E7)],
+          colors: [appBackground, primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
+        border: Border.all(color: border),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Stack(children: [
@@ -693,8 +702,8 @@ class _WelcomeHero extends StatelessWidget {
           top: 12,
           child: Transform.rotate(
             angle: -.35,
-            child: const Icon(Icons.eco_rounded,
-                size: 42, color: Color(0xFF6DBA6C)),
+            child: Icon(Icons.eco_rounded,
+                size: 42, color: secondary.withValues(alpha: .35)),
           ),
         ),
         Align(
@@ -776,11 +785,11 @@ class _SummaryCard extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border.all(color: Colors.white, width: 2),
               borderRadius: BorderRadius.circular(20),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                    color: Color(0x0E0B3D25),
+                    color: primaryDark.withValues(alpha: .06),
                     blurRadius: 12,
-                    offset: Offset(0, 3)),
+                    offset: const Offset(0, 3)),
               ],
             ),
             child: Column(
@@ -844,13 +853,13 @@ class _StartCollectionCard extends StatelessWidget {
               height: 76,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                    colors: [Color(0xFF159447), Color(0xFF075E32)]),
+                    colors: [primaryDark, primary]),
                 borderRadius: BorderRadius.circular(24),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Color(0x3B08783C),
+                    color: primary.withValues(alpha: .32),
                     blurRadius: 14,
-                    offset: Offset(0, 6),
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
@@ -984,18 +993,19 @@ class _QuickActionCard extends StatelessWidget {
 }
 
 class _MinistryAlignmentCard extends StatelessWidget {
-  const _MinistryAlignmentCard();
+  const _MinistryAlignmentCard({required this.controller});
+  final MinistryController controller;
 
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.all(17),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [Color(0xFFF2FAEA), Color(0xFFDFF3DF)],
+            colors: [appBackground, primaryLight],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          border: Border.all(color: const Color(0xFFC9E3C8)),
+          border: Border.all(color: border),
           borderRadius: BorderRadius.circular(18),
         ),
         child: Stack(children: [
@@ -1010,31 +1020,31 @@ class _MinistryAlignmentCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: const BoxDecoration(
-                  color: Color(0xFFE1F5E4), shape: BoxShape.circle),
+                  color: primaryLight, shape: BoxShape.circle),
               child: const Icon(Icons.account_balance_rounded,
                   color: primaryDark, size: 27),
             ),
             const SizedBox(width: 13),
-            const Expanded(
+            Expanded(
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('A GREENER, STRONGER INDIA',
-                        style: TextStyle(
+                    Text(controller.t('ministryGreenerIndia'),
+                        style: const TextStyle(
                             color: primary,
                             fontSize: 9,
                             letterSpacing: 1.4,
                             fontWeight: FontWeight.w900)),
-                    SizedBox(height: 5),
-                    Text('Ministry of Mines alignment',
-                        style: TextStyle(
+                    const SizedBox(height: 5),
+                    Text(controller.t('ministryAlignment'),
+                        style: const TextStyle(
                             color: textMain,
                             fontSize: 16,
                             fontWeight: FontWeight.w900)),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'Formal recycling, traceable handovers and awareness of potentially recoverable critical materials.',
-                      style: TextStyle(color: textMuted, fontSize: 12),
+                      controller.t('ministryAlignmentSub'),
+                      style: const TextStyle(color: textMuted, fontSize: 12),
                     ),
                   ]),
             ),
@@ -1044,7 +1054,7 @@ class _MinistryAlignmentCard extends StatelessWidget {
 }
 
 String _syncSubtitle(MinistryController controller) {
-  if (controller.syncing) return 'Syncing…';
+  if (controller.syncing) return controller.t('syncing');
   if (!controller.online) return controller.t('offline');
   if (controller.pendingSyncCount > 0) {
     return '${controller.pendingSyncCount} ${controller.t('pendingSync')}';
@@ -1102,6 +1112,54 @@ String _homeCopy(String language, String key) {
       'goodAgain': 'तुम्हाला पुन्हा पाहून आनंद झाला!',
       'smallSteps': 'छोटी पावले. स्वच्छ, हरित उद्या.',
     },
+    'kn': {
+      'collectionValue': 'ಒಟ್ಟು ಸಂಗ್ರಹ ಮೌಲ್ಯ',
+      'settlement': 'ಪಾವತಿಗಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ',
+      'lotsCreated': 'ರಚಿಸಲಾದ ಒಟ್ಟು ಲಾಟ್‌ಗಳು',
+      'scanCollect': 'ಸ್ಕ್ಯಾನ್  •  ಸಂಗ್ರಹ  •  ಬದಲಾವಣೆ',
+      'quickActions': 'ತ್ವರಿತ ಕ್ರಿಯೆಗಳು',
+      'onePlace': 'ನಿಮಗೆ ಬೇಕಾಗಿರುವುದು ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ',
+      'latestRates': 'ಇತ್ತೀಚಿನ ದರಗಳನ್ನು ಪರಿಶೀಲಿಸಿ',
+      'viewManage': 'ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ',
+      'workSafe': 'ಸುರಕ್ಷಿತವಾಗಿ ಕೆಲಸ ಮಾಡಿ',
+      'partnerTrack': 'ಪಾಲುದಾರ ಮತ್ತು ಟ್ರ್ಯಾಕ್',
+      'incomeDetails': 'ಆದಾಯ ವಿವರಗಳನ್ನು ವೀಕ್ಷಿಸಿ',
+      'updated': 'ಡೇಟಾ ಅಪ್‌ಡೇಟ್ ಆಗಿದೆ',
+      'goodAgain': 'ನಿಮ್ಮನ್ನು ಮತ್ತೆ ನೋಡಿ ಸಂತೋಷವಾಯಿತು!',
+      'smallSteps': 'ಸಣ್ಣ ಹೆಜ್ಜೆಗಳು. ಸ್ವಚ್ಛ, ಹಸಿರು ನಾಳೆ.',
+    },
+    'te': {
+      'collectionValue': 'మొత్తం సేకరణ విలువ',
+      'settlement': 'చెల్లింపు కోసం వేచి ఉంది',
+      'lotsCreated': 'మొత్తం సృష్టించిన లాట్లు',
+      'scanCollect': 'స్కాన్  •  సేకరణ  •  మార్పు',
+      'quickActions': 'శీఘ్ర చర్యలు',
+      'onePlace': 'మీకు కావాల్సినవన్నీ ఒకే చోట',
+      'latestRates': 'తాజా ధరలను తనిఖీ చేయండి',
+      'viewManage': 'చూడండి మరియు నిర్వహించండి',
+      'workSafe': 'సురక్షితంగా పని చేయండి',
+      'partnerTrack': 'భాగస్వామి మరియు ట్రాక్',
+      'incomeDetails': 'ఆదాయ వివరాలను చూడండి',
+      'updated': 'డేటా నవీకరించబడింది',
+      'goodAgain': 'మిమ్మల్ని మళ్లీ చూడటం ఆనందంగా ఉంది!',
+      'smallSteps': 'చిన్న అడుగులు. పరిశుభ్రమైన, పచ్చని రేపు.',
+    },
+    'bn': {
+      'collectionValue': 'মোট সংগ্রহ মূল্য',
+      'settlement': 'পেমেন্টের অপেক্ষায়',
+      'lotsCreated': 'মোট তৈরি লট',
+      'scanCollect': 'স্ক্যান  •  সংগ্রহ  •  পরিবর্তন',
+      'quickActions': 'দ্রুত পদক্ষেপ',
+      'onePlace': 'আপনার প্রয়োজনীয় সবকিছু এক জায়গায়',
+      'latestRates': 'সর্বশেষ রেট পরীক্ষা করুন',
+      'viewManage': 'দেখুন এবং পরিচালনা করুন',
+      'workSafe': 'নিরাপদে কাজ করুন',
+      'partnerTrack': 'অংশীদার এবং ট্র্যাক',
+      'incomeDetails': 'আয়ের বিবরণ দেখুন',
+      'updated': 'ডেটা আপডেট হয়েছে',
+      'goodAgain': 'আপনাকে আবার দেখে ভালো লাগলো!',
+      'smallSteps': 'ছোট পদক্ষেপ। একটি পরিচ্ছন্ন, সবুজ আগামীকাল।',
+    },
   };
   return copy[language]?[key] ?? copy['en']![key] ?? key;
 }
@@ -1115,14 +1173,14 @@ class PriceBoardScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           PageHeading(controller.t('priceBoard'),
-              '7-day seeded reference history for Pune.'),
+              controller.t('priceBoardSub')),
           const SizedBox(height: 6),
           DemoLabel(text: controller.t('referenceOnly')),
           const SizedBox(height: 12),
           TextField(
-            decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search_rounded),
-                hintText: 'Search material'),
+            decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search_rounded),
+                hintText: controller.t('searchMaterial')),
             onChanged: (value) {
               controller.setPriceSearch(value);
             },
@@ -1131,10 +1189,10 @@ class PriceBoardScreen extends StatelessWidget {
           DropdownButtonFormField<String>(
             isExpanded: true,
             initialValue: controller.priceMaterialFilter,
-            decoration: const InputDecoration(labelText: 'Material filter'),
+            decoration: InputDecoration(labelText: controller.t('materialFilter')),
             items: [
-              const DropdownMenuItem(
-                  value: 'all', child: Text('All materials')),
+              DropdownMenuItem(
+                  value: 'all', child: Text(controller.t('allMaterials'))),
               ...materialCatalog.values.map((item) => DropdownMenuItem(
                   value: item.id, child: Text(item.name(controller.language)))),
             ],
@@ -1144,9 +1202,9 @@ class PriceBoardScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           if (controller.filteredPrices.isEmpty)
-            const EmptyState(
+            EmptyState(
                 icon: Icons.search_off_rounded,
-                text: 'No matching reference prices.')
+                text: controller.t('noMatchingPrices'))
           else
             ...controller.filteredPrices.map((price) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -1170,8 +1228,8 @@ class _PriceCard extends StatelessWidget {
             ? Icons.trending_down_rounded
             : Icons.trending_flat_rounded);
     final trendLabel = price.trend > 0
-        ? 'Increasing'
-        : (price.trend < 0 ? 'Decreasing' : 'Stable');
+        ? controller.t('trendIncreasing')
+        : (price.trend < 0 ? controller.t('trendDecreasing') : controller.t('trendStable'));
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -1184,7 +1242,7 @@ class _PriceCard extends StatelessWidget {
                     style: const TextStyle(
                         fontWeight: FontWeight.w900, fontSize: 17))),
             IconButton(
-                tooltip: 'Speak reference price',
+                tooltip: controller.t('speakPriceTooltip'),
                 onPressed: () => controller.speak(
                     '${material.name(controller.language)}. ${price.marketMin.round()} to ${price.marketMax.round()} rupees per kilogram. Demo reference data.'),
                 icon: const Icon(Icons.volume_up_rounded)),
@@ -1193,7 +1251,7 @@ class _PriceCard extends StatelessWidget {
               '${controller.money(price.marketMin)}-${controller.money(price.marketMax)} / ${price.unit}',
               style: const TextStyle(
                   fontSize: 20, color: primary, fontWeight: FontWeight.w900)),
-          Text('${price.location} • Updated ${shortDate(price.updatedAt)}',
+          Text('${price.location} • ${controller.t('updatedOn')} ${shortDate(price.updatedAt)}',
               style: const TextStyle(color: textMuted, fontSize: 12)),
           const SizedBox(height: 8),
           SizedBox(
@@ -1205,7 +1263,7 @@ class _PriceCard extends StatelessWidget {
           Row(children: [
             Icon(trendIcon, size: 18, color: primary),
             const SizedBox(width: 4),
-            Text('$trendLabel • 7 days',
+            Text('$trendLabel • ${controller.t('daysTrend')}',
                 style: const TextStyle(fontWeight: FontWeight.w700)),
           ]),
         ]),
@@ -1283,34 +1341,38 @@ class SchemesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = controller;
     return ListView(padding: const EdgeInsets.all(16), children: [
-      const PageHeading('Government & EPR Schemes', 'Access formal recycling initiatives, certification guidance, and available MSME support.'),
+      PageHeading(c.t('schemesTitle'), c.t('schemesSubtitle')),
       const SizedBox(height: 12),
-      const _SchemeCard(
-        title: 'EPR Registration (CPCB)',
-        authority: 'Central Pollution Control Board',
-        eligibility: 'Authorized Recyclers, Dismantlers, Refurbishers',
-        description: 'Mandatory registration under E-Waste (Management) Rules, 2022 to generate and trade EPR certificates.',
-        documents: 'Consent to Operate, GST, PAN, Factory License, Machinery Details',
-        actionLabel: 'View EPR Portal Guide',
+      _SchemeCard(
+        controller: c,
+        title: c.t('scheme1Title'),
+        authority: c.t('scheme1Authority'),
+        eligibility: c.t('scheme1Eligibility'),
+        description: c.t('scheme1Desc'),
+        documents: c.t('scheme1Docs'),
+        actionLabel: c.t('scheme1Action'),
       ),
       const SizedBox(height: 10),
-      const _SchemeCard(
-        title: 'MSME Sustainable (ZED) Certification',
-        authority: 'Ministry of MSME',
-        eligibility: 'All MSME units (Collectors & Aggregators acting as micro-enterprises)',
-        description: 'Financial assistance and certification for adopting Zero Defect Zero Effect (ZED) practices.',
-        documents: 'Udyam Registration, Aadhaar, Bank Details',
-        actionLabel: 'Apply for ZED',
+      _SchemeCard(
+        controller: c,
+        title: c.t('scheme2Title'),
+        authority: c.t('scheme2Authority'),
+        eligibility: c.t('scheme2Eligibility'),
+        description: c.t('scheme2Desc'),
+        documents: c.t('scheme2Docs'),
+        actionLabel: c.t('scheme2Action'),
       ),
       const SizedBox(height: 10),
-      const _SchemeCard(
-        title: 'Informal Sector Formalization Grant',
-        authority: 'State Pollution Control Board',
-        eligibility: 'Individual Kabadiwalas & Scrap Aggregators',
-        description: 'Provides safety gear, formal identity cards, and micro-loans to transition into the formal ecosystem.',
-        documents: 'Aadhaar, Municipal Permit, Bank Account',
-        actionLabel: 'Check State Eligibility',
+      _SchemeCard(
+        controller: c,
+        title: c.t('scheme3Title'),
+        authority: c.t('scheme3Authority'),
+        eligibility: c.t('scheme3Eligibility'),
+        description: c.t('scheme3Desc'),
+        documents: c.t('scheme3Docs'),
+        actionLabel: c.t('scheme3Action'),
       ),
     ]);
   }
@@ -1318,6 +1380,7 @@ class SchemesScreen extends StatelessWidget {
 
 class _SchemeCard extends StatelessWidget {
   const _SchemeCard({
+    required this.controller,
     required this.title,
     required this.authority,
     required this.eligibility,
@@ -1326,6 +1389,7 @@ class _SchemeCard extends StatelessWidget {
     required this.actionLabel,
   });
 
+  final MinistryController controller;
   final String title;
   final String authority;
   final String eligibility;
@@ -1351,9 +1415,9 @@ class _SchemeCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(authority, style: const TextStyle(color: primary, fontWeight: FontWeight.w700, fontSize: 12)),
             const Divider(),
-            LabelValue('Eligibility', eligibility),
-            LabelValue('About', description),
-            LabelValue('Required Documents', documents),
+            LabelValue(controller.t('eligibilityLabel'), eligibility),
+            LabelValue(controller.t('aboutLabel'), description),
+            LabelValue(controller.t('requiredDocsLabel'), documents),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -1361,7 +1425,7 @@ class _SchemeCard extends StatelessWidget {
                 label: actionLabel,
                 icon: Icons.open_in_new_rounded,
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('This would open the official scheme portal or application form.')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(controller.t('schemePortalNotice'))));
                 },
               ),
             ),

@@ -22,8 +22,8 @@ void main() {
     );
   });
 
-  test('all three languages contain core navigation labels', () {
-    for (final language in ['mr', 'hi', 'en']) {
+  test('all six languages contain core navigation labels', () {
+    for (final language in ['mr', 'hi', 'en', 'kn', 'te', 'bn']) {
       expect(textFor(language, 'start'), isNotEmpty);
       expect(textFor(language, 'confirmHandover'), isNotEmpty);
       expect(stepLabels[language], hasLength(5));

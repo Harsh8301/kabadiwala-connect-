@@ -4,10 +4,8 @@ import 'ministry_controller.dart';
 import 'screens/collection_workflow.dart';
 import 'screens/dashboard_reference.dart';
 import 'screens/traceability_workflow.dart';
-import 'services/workflow_services.dart';
 import 'services/dataset_service.dart';
 import 'widgets/common.dart' hide LabelValue;
-import 'widgets/ministry_components.dart';
 import 'screens/unit_economics.dart';
 import 'screens/qr_scanner_screen.dart';
 import 'models/workflow_models.dart';
@@ -66,6 +64,7 @@ class _MinistryAppState extends State<MinistryApp> {
         home: showSplash
             ? _SplashScreen(
                 failed: initializationFailed,
+                controller: controller,
                 onRetry: initializationFailed
                     ? () {
                         setState(() => initializationFailed = false);
@@ -78,9 +77,10 @@ class _MinistryAppState extends State<MinistryApp> {
 }
 
 class _SplashScreen extends StatelessWidget {
-  const _SplashScreen({required this.failed, this.onRetry});
+  const _SplashScreen({required this.failed, this.onRetry, this.controller});
   final bool failed;
   final VoidCallback? onRetry;
+  final MinistryController? controller;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -115,15 +115,15 @@ class _SplashScreen extends StatelessWidget {
                       child: CircularProgressIndicator(strokeWidth: 3),
                     )
                   else ...[
-                    const Text(
-                      'The app could not finish loading.',
+                    Text(
+                      controller?.t('appLoadFailed') ?? 'The app could not finish loading.',
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
                     FilledButton.icon(
                       onPressed: onRetry,
                       icon: const Icon(Icons.refresh_rounded),
-                      label: const Text('Retry'),
+                      label: Text(controller?.t('retryLoad') ?? 'Retry'),
                     ),
                   ],
                 ]),
@@ -182,15 +182,15 @@ class _AppShell extends StatelessWidget {
             ? null
             : AppBar(
                 leading: IconButton(
-                    tooltip: 'Back',
+                    tooltip: controller.t('back'),
                     onPressed: controller.back,
                     icon: const Icon(Icons.arrow_back_rounded)),
                 titleSpacing: 0,
-                title: const Text(
-                  'Kabadiwala Connect',
+                title: Text(
+                  controller.t('app'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
                 ),
                 actions: [
                   IconButton.filledTonal(
@@ -204,7 +204,7 @@ class _AppShell extends StatelessWidget {
                   ),
                   _StatusButton(controller: controller),
                   PopupMenuButton<String>(
-                    tooltip: 'Language',
+                    tooltip: controller.t('language'),
                     initialValue: controller.language,
                     icon: const Icon(Icons.language_rounded),
                     onSelected: controller.setLanguage,
@@ -212,6 +212,9 @@ class _AppShell extends StatelessWidget {
                       PopupMenuItem(value: 'en', child: Text('English')),
                       PopupMenuItem(value: 'hi', child: Text('हिंदी')),
                       PopupMenuItem(value: 'mr', child: Text('मराठी')),
+                      PopupMenuItem(value: 'kn', child: Text('ಕನ್ನಡ')),
+                      PopupMenuItem(value: 'te', child: Text('తెలుగు')),
+                      PopupMenuItem(value: 'bn', child: Text('বাংলা')),
                     ],
                   ),
                 ],
@@ -279,25 +282,25 @@ class _HomeBottomNavigation extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFE6F6E9), Color(0xFFF4FAEE)],
+                  colors: [primaryLight, appBackground],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: const Color(0xFFCFE5D2)),
+                border: Border.all(color: border),
               ),
               child: Column(children: [
                 Container(
                   width: 72,
                   height: 72,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: primary,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0x35176B3A),
+                        color: primary.withValues(alpha: .25),
                         blurRadius: 14,
-                        offset: Offset(0, 5),
+                        offset: const Offset(0, 5),
                       ),
                     ],
                   ),
@@ -342,6 +345,9 @@ class _HomeBottomNavigation extends StatelessWidget {
               value: switch (controller.language) {
                 'mr' => 'मराठी',
                 'hi' => 'हिन्दी',
+                'kn' => 'ಕನ್ನಡ',
+                'te' => 'తెలుగు',
+                'bn' => 'বাংলা',
                 _ => 'English',
               },
             ),
@@ -354,7 +360,7 @@ class _HomeBottomNavigation extends StatelessWidget {
                   controller.go(WorkflowScreen.unitEconomics);
                 },
                 icon: const Icon(Icons.show_chart_rounded),
-                label: const Text('View Unit Economics', style: TextStyle(fontWeight: FontWeight.w800)),
+                label: Text(controller.t('viewUnitEconomics'), style: const TextStyle(fontWeight: FontWeight.w800)),
               ),
             ),
             const SizedBox(height: 10),
@@ -365,11 +371,11 @@ class _HomeBottomNavigation extends StatelessWidget {
                   final data = DatasetService.generateDatasets(controller.lots);
                   // In a real app this would save to a file or share it. 
                   // For the demo we just print it to show it works.
-                  print('Datasets Generated: ${data.keys.join(', ')}');
-                  ScaffoldMessenger.of(sheetContext).showSnackBar(const SnackBar(content: Text('Datasets logged to console.')));
+                  debugPrint('Datasets Generated: ${data.keys.join(', ')}');
+                  ScaffoldMessenger.of(sheetContext).showSnackBar(SnackBar(content: Text(controller.t('datasetsLogged'))));
                 },
                 icon: const Icon(Icons.download_rounded),
-                label: const Text('Export Datasets (Demo)', style: TextStyle(fontWeight: FontWeight.w800)),
+                label: Text(controller.t('exportDatasets'), style: const TextStyle(fontWeight: FontWeight.w800)),
               ),
             ),
             const SizedBox(height: 10),
@@ -379,10 +385,10 @@ class _HomeBottomNavigation extends StatelessWidget {
                 onPressed: () {
                   Navigator.pop(sheetContext);
                   controller.resetDemo();
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Demo state reset. Offline mode active.')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(controller.t('demoResetNotice'))));
                 },
                 icon: const Icon(Icons.restart_alt_rounded),
-                label: const Text('Reset Demo State', style: TextStyle(fontWeight: FontWeight.w800)),
+                label: Text(controller.t('resetDemoState'), style: const TextStyle(fontWeight: FontWeight.w800)),
               ),
             ),
             const SizedBox(height: 20),
@@ -392,8 +398,8 @@ class _HomeBottomNavigation extends StatelessWidget {
                 onPressed: () => _confirmLogout(sheetContext),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: danger,
-                  side: const BorderSide(color: Color(0xFFF0B8B8)),
-                  backgroundColor: const Color(0xFFFFF7F7),
+                  side: const BorderSide(color: accentBorder),
+                  backgroundColor: accentLight,
                   minimumSize: const Size.fromHeight(54),
                 ),
                 icon: const Icon(Icons.logout_rounded),
@@ -411,7 +417,7 @@ class _HomeBottomNavigation extends StatelessWidget {
   Widget build(BuildContext context) => Material(
         color: Colors.white,
         elevation: 12,
-        shadowColor: const Color(0x220B3D25),
+        shadowColor: primaryDark.withValues(alpha: .12),
         child: SafeArea(
           top: false,
           child: SizedBox(
@@ -439,14 +445,14 @@ class _HomeBottomNavigation extends StatelessWidget {
                       child: Ink(
                         width: 58,
                         height: 58,
-                        decoration: const BoxDecoration(
-                          color: primary,
+                        decoration: BoxDecoration(
+                          color: secondary,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Color(0x44176B3A),
+                              color: secondary.withValues(alpha: .35),
                               blurRadius: 14,
-                              offset: Offset(0, 5),
+                              offset: const Offset(0, 5),
                             ),
                           ],
                         ),
@@ -546,7 +552,7 @@ class _BottomDestination extends StatelessWidget {
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Icon(icon,
                   size: 24,
-                  color: selected ? primary : const Color(0xFF68716C)),
+                  color: selected ? primary : textMuted),
               const SizedBox(height: 3),
               Text(
                 label,
@@ -555,7 +561,7 @@ class _BottomDestination extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                  color: selected ? primary : const Color(0xFF68716C),
+                  color: selected ? primary : textMuted,
                 ),
               ),
             ]),

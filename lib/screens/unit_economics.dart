@@ -26,48 +26,47 @@ class UnitEconomicsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Unit Economics', style: TextStyle(fontWeight: FontWeight.w900)),
+        title: Text(controller.t('unitEconomicsTitle'), style: const TextStyle(fontWeight: FontWeight.w900)),
         backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF0F172A),
+        foregroundColor: primary,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          PageHeading('Impact Analysis', 'Comparative economic model for scrap collectors.'),
+          PageHeading(controller.t('impactAnalysis'), controller.t('impactAnalysisSub')),
           const SizedBox(height: 16),
           _RouteCard(
-            title: 'Current Route',
+            controller: controller,
+            title: controller.t('currentRoute'),
             gross: currentGross,
             deductions: [
-              _Deduction('Transport', currentTransport),
-              _Deduction('Middleman Margin', currentMiddlemanDeductions),
+              _Deduction(controller.t('transport'), currentTransport),
+              _Deduction(controller.t('middlemanMargin'), currentMiddlemanDeductions),
             ],
             net: currentEarnings,
-            color: const Color(0xFFFFF5DF),
-            accent: const Color(0xFFB45309),
+            color: saffronLight,
+            accent: saffronDark,
           ),
           const SizedBox(height: 16),
           _RouteCard(
-            title: 'Platform Route',
+            controller: controller,
+            title: controller.t('platformRoute'),
             gross: platformGross,
             deductions: [
-              _Deduction('Optimized Transport', platformTransport),
-              _Deduction('Platform Service Fee', platformFee),
+              _Deduction(controller.t('optimizedTransport'), platformTransport),
+              _Deduction(controller.t('platformServiceFee'), platformFee),
             ],
             net: platformEarnings,
-            color: const Color(0xFFEAF8ED),
-            accent: const Color(0xFF138347),
+            color: primaryLight,
+            accent: primary,
             highlight: true,
           ),
           const SizedBox(height: 24),
-          const Text('Platform Sustainability', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+          Text(controller.t('platformSustainability'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
           const SizedBox(height: 8),
-          const Text(
-            'The platform does not charge the collector a fee. Sustainability is achieved through:\n\n'
-            '1. B2B Recycler Subscriptions: Recyclers pay for access to verified, sorted material streams.\n'
-            '2. Government Integration: Institutional funding for maintaining EPR datasets and scheme navigation.\n'
-            '3. Aggregated Logistics: Monetizing optimized transport routes for bulk pickups.',
-            style: TextStyle(color: Color(0xFF475569), height: 1.5),
+          Text(
+            controller.t('sustainabilityBody'),
+            style: const TextStyle(color: textMuted, height: 1.5),
           ),
         ],
       ),
@@ -83,6 +82,7 @@ class _Deduction {
 
 class _RouteCard extends StatelessWidget {
   const _RouteCard({
+    required this.controller,
     required this.title,
     required this.gross,
     required this.deductions,
@@ -92,6 +92,7 @@ class _RouteCard extends StatelessWidget {
     this.highlight = false,
   });
 
+  final MinistryController controller;
   final String title;
   final double gross;
   final List<_Deduction> deductions;
@@ -106,7 +107,7 @@ class _RouteCard extends StatelessWidget {
       color: color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: highlight ? const BorderSide(color: Color(0xFF138347), width: 2) : BorderSide.none,
+        side: highlight ? const BorderSide(color: primary, width: 2) : BorderSide.none,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -115,14 +116,14 @@ class _RouteCard extends StatelessWidget {
           children: [
             Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: accent)),
             const Divider(height: 24),
-            _LineItem('Gross Sale Value', gross, isBold: true),
+            _LineItem(controller.t('grossSaleValue'), gross, isBold: true),
             const SizedBox(height: 8),
             ...deductions.map((d) => Padding(
               padding: const EdgeInsets.only(bottom: 4),
-              child: _LineItem('- ${d.label}', -d.amount, color: const Color(0xFFDC2626)),
+              child: _LineItem('- ${d.label}', -d.amount, color: danger),
             )),
             const Divider(height: 24),
-            _LineItem('Net Earnings', net, isBold: true, color: accent, size: 20),
+            _LineItem(controller.t('netEarnings'), net, isBold: true, color: accent, size: 20),
           ],
         ),
       ),

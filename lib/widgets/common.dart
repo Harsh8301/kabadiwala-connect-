@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 
-import '../data/app_data.dart';
 
-const primary = Color(0xFF176B3A);
-const primaryDark = Color(0xFF0B3D25);
-const primaryLight = Color(0xFFE4F2E7);
-const secondary = Color(0xFFB8612A);
-const copper = Color(0xFFB8612A);
-const warning = Color(amber);
-const danger = Color(hazardRed);
-const canvas = Color(0xFFEDEFEA);
-const appBackground = Color(0xFFFAF7EF);
-const subtle = Color(0xFFF0F4EC);
-const textMain = Color(0xFF27322C);
-const textMuted = Color(0xFF56635B);
-const border = Color(0xFFDDE4DB);
+const primary = Color(0xFF37474F);
+const primaryDark = Color(0xFF263238);
+const primaryLight = Color(0xFFECEFF1);
+const secondary = Color(0xFFF4A300);
+const saffron = Color(0xFFF4A300);
+const saffronLight = Color(0xFFFEF3D6);
+const saffronDark = Color(0xFFC97D00);
+const accent = Color(0xFFA63A22);
+const accentLight = Color(0xFFFCEBE6);
+const accentBorder = Color(0xFFEDB6AA);
+const copper = Color(0xFFF4A300);
+const warning = Color(0xFFF4A300);
+const danger = Color(0xFFA63A22);
+const canvas = Color(0xFFECEFF1);
+const appBackground = Color(0xFFFAF8F5);
+const subtle = Color(0xFFECEFF1);
+const textMain = Color(0xFF263238);
+const textMuted = Color(0xFF607D8B);
+const border = Color(0xFFCFD8DC);
 
 ThemeData buildTheme() => ThemeData(
       useMaterial3: true,
@@ -27,8 +32,8 @@ ThemeData buildTheme() => ThemeData(
         surface: Colors.white,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFFFAF7EF),
-        foregroundColor: primaryDark,
+        backgroundColor: appBackground,
+        foregroundColor: primary,
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 1,
@@ -166,7 +171,7 @@ class SecondaryButton extends StatelessWidget {
           onPressed: onPressed,
           style: OutlinedButton.styleFrom(
             foregroundColor: primary,
-            side: const BorderSide(color: Color(0xFFB7CCB8)),
+            side: const BorderSide(color: border),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -226,13 +231,13 @@ class MaterialPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = switch (category) {
-      'battery' => ('🔋', const Color(0xFF18181B), const Color(0xFFDC2626)),
-      'cables' => ('🔌', const Color(0xFF1E293B), const Color(0xFFEA580C)),
-      'motor' => ('⚙️', const Color(0xFF334155), const Color(0xFF0284C7)),
-      'crt' => ('📺', const Color(0xFF312E81), const Color(0xFF818CF8)),
-      'mixed' => ('📦', const Color(0xFF374151), const Color(0xFFD97706)),
-      'other' => ('❓', const Color(0xFF475569), const Color(0xFFCBD5E1)),
-      _ => ('🖧', const Color(0xFF064E3B), const Color(0xFF10B981)),
+      'battery' => ('🔋', primaryDark, accent),
+      'cables' => ('🔌', primaryDark, secondary),
+      'motor' => ('⚙️', primary, const Color(0xFF546E7A)),
+      'crt' => ('📺', primaryDark, primary),
+      'mixed' => ('📦', primaryDark, secondary),
+      'other' => ('❓', primary, const Color(0xFF78909C)),
+      _ => ('🖧', primaryDark, secondary),
     };
     return Container(
       height: height,

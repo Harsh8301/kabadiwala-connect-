@@ -80,10 +80,10 @@ class InfoBand extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: dangerStyle ? const Color(0xFFFFF1F2) : primaryLight,
+          color: dangerStyle ? accentLight : primaryLight,
           borderRadius: BorderRadius.circular(8),
           border:
-              Border.all(color: dangerStyle ? danger : const Color(0xFFB7CCB8)),
+              Border.all(color: dangerStyle ? danger : border),
         ),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Icon(icon, color: dangerStyle ? danger : primary),
@@ -108,14 +108,14 @@ class DemoLabel extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF7E6),
+          color: saffronLight,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: const Color(0xFFF2C66D)),
+          border: Border.all(color: const Color(0xFFFCD34D)),
         ),
         child: Text(text,
             style: const TextStyle(
                 fontSize: 11,
-                color: Color(0xFF7A4B00),
+                color: saffronDark,
                 fontWeight: FontWeight.w800)),
       );
 }
@@ -191,9 +191,9 @@ class SafetyNoticeCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF4E5),
+          color: saffronLight,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFE58A2B), width: 1.5),
+          border: Border.all(color: secondary, width: 1.5),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -201,7 +201,7 @@ class SafetyNoticeCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: const BoxDecoration(
-                color: Color(0xFFFFE1DC),
+                color: accentLight,
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.warning_amber_rounded,
@@ -214,7 +214,7 @@ class SafetyNoticeCard extends StatelessWidget {
                   children: [
                     Text(title,
                         style: const TextStyle(
-                            color: Color(0xFF8F241B),
+                            color: accent,
                             fontSize: 17,
                             fontWeight: FontWeight.w900)),
                     const SizedBox(height: 5),
@@ -276,7 +276,3 @@ String shortDate(DateTime value) =>
 
 String dateTimeLabel(DateTime value) =>
     '${shortDate(value)} ${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
-
-String statusLabel(LotStatus value) => value.name
-    .replaceAllMapped(RegExp(r'([A-Z])'), (match) => ' ${match.group(1)}')
-    .trim();

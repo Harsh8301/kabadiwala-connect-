@@ -41,7 +41,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Scan Lot QR'),
+        title: Text(widget.controller.t('scanLotQr')),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -68,11 +68,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             bottom: 60,
             child: Text(
-              'Align the Lot QR Code within the frame',
-              style: TextStyle(
+              widget.controller.t('alignQrFrame'),
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -87,7 +87,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
 class QrScannerOverlayShape extends ShapeBorder {
   const QrScannerOverlayShape({
-    this.borderColor = Colors.red,
+    this.borderColor = secondary,
     this.borderWidth = 3.0,
     this.overlayColor = const Color.fromRGBO(0, 0, 0, 80),
     this.borderRadius = 0,
@@ -129,11 +129,10 @@ class QrScannerOverlayShape extends ShapeBorder {
   @override
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     final width = rect.width;
-    final borderWidthSize = width / 2;
     final height = rect.height;
-    final borderOffset = borderWidth / 2;
-    final _borderLength = borderLength > cutOutSize / 2 ? cutOutSize / 2 : borderLength;
-    final _cutOutSize = cutOutSize;
+    final effectiveBorderLength =
+        borderLength > cutOutSize / 2 ? cutOutSize / 2 : borderLength;
+    final effectiveCutOutSize = cutOutSize;
 
     final backgroundPaint = Paint()
       ..color = overlayColor
@@ -150,10 +149,10 @@ class QrScannerOverlayShape extends ShapeBorder {
       ..blendMode = BlendMode.dstOut;
 
     final cutOutRect = Rect.fromLTWH(
-      rect.left + width / 2 - _cutOutSize / 2,
-      rect.top + height / 2 - _cutOutSize / 2,
-      _cutOutSize,
-      _cutOutSize,
+      rect.left + width / 2 - effectiveCutOutSize / 2,
+      rect.top + height / 2 - effectiveCutOutSize / 2,
+      effectiveCutOutSize,
+      effectiveCutOutSize,
     );
 
     canvas
@@ -168,48 +167,48 @@ class QrScannerOverlayShape extends ShapeBorder {
     canvas
       ..drawPath(
         Path()
-          ..moveTo(cutOutRect.left, cutOutRect.top + _borderLength)
+          ..moveTo(cutOutRect.left, cutOutRect.top + effectiveBorderLength)
           ..lineTo(cutOutRect.left, cutOutRect.top + borderRadius)
           ..arcToPoint(
             Offset(cutOutRect.left + borderRadius, cutOutRect.top),
             radius: Radius.circular(borderRadius),
           )
-          ..lineTo(cutOutRect.left + _borderLength, cutOutRect.top),
+          ..lineTo(cutOutRect.left + effectiveBorderLength, cutOutRect.top),
         borderPaint,
       )
       ..drawPath(
         Path()
-          ..moveTo(cutOutRect.right, cutOutRect.top + _borderLength)
+          ..moveTo(cutOutRect.right, cutOutRect.top + effectiveBorderLength)
           ..lineTo(cutOutRect.right, cutOutRect.top + borderRadius)
           ..arcToPoint(
             Offset(cutOutRect.right - borderRadius, cutOutRect.top),
             radius: Radius.circular(borderRadius),
           )
-          ..lineTo(cutOutRect.right - _borderLength, cutOutRect.top),
+          ..lineTo(cutOutRect.right - effectiveBorderLength, cutOutRect.top),
         borderPaint,
       )
       ..drawPath(
         Path()
-          ..moveTo(cutOutRect.left, cutOutRect.bottom - _borderLength)
+          ..moveTo(cutOutRect.left, cutOutRect.bottom - effectiveBorderLength)
           ..lineTo(cutOutRect.left, cutOutRect.bottom - borderRadius)
           ..arcToPoint(
             Offset(cutOutRect.left + borderRadius, cutOutRect.bottom),
             radius: Radius.circular(borderRadius),
             clockwise: false,
           )
-          ..lineTo(cutOutRect.left + _borderLength, cutOutRect.bottom),
+          ..lineTo(cutOutRect.left + effectiveBorderLength, cutOutRect.bottom),
         borderPaint,
       )
       ..drawPath(
         Path()
-          ..moveTo(cutOutRect.right, cutOutRect.bottom - _borderLength)
+          ..moveTo(cutOutRect.right, cutOutRect.bottom - effectiveBorderLength)
           ..lineTo(cutOutRect.right, cutOutRect.bottom - borderRadius)
           ..arcToPoint(
             Offset(cutOutRect.right - borderRadius, cutOutRect.bottom),
             radius: Radius.circular(borderRadius),
             clockwise: true,
           )
-          ..lineTo(cutOutRect.right - _borderLength, cutOutRect.bottom),
+          ..lineTo(cutOutRect.right - effectiveBorderLength, cutOutRect.bottom),
         borderPaint,
       );
   }

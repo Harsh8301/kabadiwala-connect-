@@ -30,11 +30,11 @@ class HomeScreen extends StatelessWidget {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                  color: Color(0x331B5E20),
+                  color: primary.withValues(alpha: .28),
                   blurRadius: 18,
-                  offset: Offset(0, 8)),
+                  offset: const Offset(0, 8)),
             ],
           ),
           child: Column(
@@ -58,7 +58,7 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 controller.t('heroDescription'),
-                style: const TextStyle(color: Color(0xFFE8F5E9), height: 1.45),
+                style: TextStyle(color: primaryLight, height: 1.45),
               ),
               const SizedBox(height: 18),
               Wrap(

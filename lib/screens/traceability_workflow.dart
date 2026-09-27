@@ -17,12 +17,12 @@ class LotDetailScreenV2 extends StatelessWidget {
   Widget build(BuildContext context) {
     final lot = controller.selectedLot;
     if (lot == null) {
-      return const EmptyState(
-          icon: Icons.inventory_2_outlined, text: 'Lot unavailable.');
+      return EmptyState(
+          icon: Icons.inventory_2_outlined, text: controller.t('lotUnavailable'));
     }
     return ListView(padding: const EdgeInsets.all(16), children: [
       PageHeading(
-          lot.lotId, 'Unique handover reference: ${lot.handoverReference}'),
+          lot.lotId, '${controller.t('handoverRefLabel')}: ${lot.handoverReference}'),
       const SizedBox(height: 12),
       Center(
         child: QrImageView(
@@ -33,7 +33,7 @@ class LotDetailScreenV2 extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 8),
-      const Center(child: DemoLabel(text: 'QR contains this local lot record')),
+      Center(child: DemoLabel(text: controller.t('qrContainsLocalRecord'))),
       const SizedBox(height: 12),
       Card(
         child: Padding(
@@ -42,7 +42,7 @@ class LotDetailScreenV2 extends StatelessWidget {
             for (final item in lot.materials)
               LabelValue(
                   materialCatalog[item.materialId]!.name(controller.language),
-                  '${item.quantity} item(s) • ${item.weightKg.toStringAsFixed(2)} kg'),
+                  '${item.quantity} ${controller.t('itemsCount')} • ${item.weightKg.toStringAsFixed(2)} kg'),
             const Divider(),
             LabelValue(controller.t('totalWeight'),
                 '${lot.totalWeightKg.toStringAsFixed(2)} kg',
@@ -50,10 +50,10 @@ class LotDetailScreenV2 extends StatelessWidget {
             LabelValue(controller.t('estimatedValue'),
                 controller.money(lot.totalEstimatedValue),
                 strong: true),
-            LabelValue('Collection location', lot.collectionLocation.label),
-            LabelValue('Status', statusLabel(lot.status)),
-            LabelValue('Payment', lot.paymentStatus.name),
-            LabelValue('Sync', lot.syncState.name),
+            LabelValue(controller.t('collectionLocation'), lot.collectionLocation.label),
+            LabelValue(controller.t('statusLabel'), statusLabel(lot.status, controller.language)),
+            LabelValue(controller.t('paymentLabel'), controller.t(lot.paymentStatus.name)),
+            LabelValue(controller.t('syncLabel'), controller.t(lot.syncState == SyncState.synced ? 'online' : 'pendingSync')),
           ]),
         ),
       ),
@@ -71,9 +71,9 @@ class LotDetailScreenV2 extends StatelessWidget {
       else
         InfoBand(
           icon: Icons.verified_rounded,
-          title: 'Handover receipt',
+          title: controller.t('handoverReceipt'),
           body:
-              '${lot.selectedRecyclerName}\nFinal weight: ${lot.finalWeightKg?.toStringAsFixed(2)} kg\nFinal value: ${controller.money(lot.finalSaleValue ?? 0)}\nPayment: ${lot.paymentStatus.name}',
+              '${lot.selectedRecyclerName}\n${controller.t('finalWeight')}: ${lot.finalWeightKg?.toStringAsFixed(2)} kg\n${controller.t('finalValue')}: ${controller.money(lot.finalSaleValue ?? 0)}\n${controller.t('paymentLabel')}: ${controller.t(lot.paymentStatus.name)}',
         ),
     ]);
   }
@@ -88,15 +88,15 @@ class RecyclerMatchScreenV2 extends StatelessWidget {
     final matches = controller.recyclerMatches();
     return ListView(padding: const EdgeInsets.all(16), children: [
       PageHeading(controller.t('findRecycler'),
-          'Rule-based ranking by compatibility, distance, rate and pickup.'),
+          controller.t('recyclerMatchSub')),
       const SizedBox(height: 6),
-      const DemoLabel(
-          text: 'Demo recyclers - authorization verification required'),
+      DemoLabel(
+          text: controller.t('demoRecyclersVerification')),
       const SizedBox(height: 12),
       if (matches.isEmpty)
-        const EmptyState(
+        EmptyState(
             icon: Icons.factory_outlined,
-            text: 'No compatible demo recycler found.'),
+            text: controller.t('noRecyclerFound')),
       ...matches.map((match) => Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Card(
@@ -138,18 +138,28 @@ class RecyclerMatchScreenV2 extends StatelessWidget {
                             ]),
                           )),
                       Text(
-                          'Offered estimate: ${controller.money(match.offeredValue)}',
+                          '${controller.t('offeredEstimate')}: ${controller.money(match.offeredValue)}',
                           style: const TextStyle(fontWeight: FontWeight.w900)),
                       Text(
                           '${match.recycler.facilityLocation} • ${match.recycler.serviceArea}',
                           style: const TextStyle(color: textMuted)),
                       const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
                         children: [
-                          _MetricChip(icon: Icons.verified_rounded, label: '${match.recycler.completedTransactions} lots'),
-                          _MetricChip(icon: Icons.price_check_rounded, label: '${match.recycler.priceConsistencyScore}% price'),
-                          _MetricChip(icon: Icons.payments_rounded, label: '${match.recycler.paymentCompletionScore}% paid'),
+                          _MetricChip(
+                              icon: Icons.verified_rounded,
+                              label:
+                                  '${match.recycler.completedTransactions} ${controller.t('lotsUnit')}'),
+                          _MetricChip(
+                              icon: Icons.price_check_rounded,
+                              label:
+                                  '${match.recycler.priceConsistencyScore}% ${controller.t('priceScore')}'),
+                          _MetricChip(
+                              icon: Icons.payments_rounded,
+                              label:
+                                  '${match.recycler.paymentCompletionScore}% ${controller.t('paidScore')}'),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -157,20 +167,20 @@ class RecyclerMatchScreenV2 extends StatelessWidget {
                         Expanded(
                             child: OutlinedButton.icon(
                                 onPressed: () => unsupported(context,
-                                    'Calling is not connected in this prototype.'),
+                                    controller.t('callNotice')),
                                 icon: const Icon(Icons.call_rounded),
-                                label: const Text('Call'))),
+                                label: Text(controller.t('call')))),
                         const SizedBox(width: 6),
                         Expanded(
                             child: OutlinedButton.icon(
                                 onPressed: () => unsupported(context,
-                                    'Directions require a maps integration.'),
+                                    controller.t('directionsNotice')),
                                 icon: const Icon(Icons.directions_rounded),
-                                label: const Text('Directions'))),
+                                label: Text(controller.t('directions')))),
                       ]),
                       const SizedBox(height: 6),
                       PrimaryButton(
-                          label: 'Select recycler',
+                          label: controller.t('selectRecycler'),
                           icon: Icons.check_circle_rounded,
                           onPressed: () =>
                               controller.chooseRecycler(match.recycler)),
@@ -181,7 +191,7 @@ class RecyclerMatchScreenV2 extends StatelessWidget {
                               match.recycler,
                               pickupRequested: true),
                           icon: const Icon(Icons.local_shipping_rounded),
-                          label: const Text('Request pickup'),
+                          label: Text(controller.t('requestPickup')),
                         ),
                       ],
                     ]),
@@ -236,15 +246,15 @@ class _HandoverScreenV2State extends State<HandoverScreenV2> {
     final c = widget.controller;
     final lot = c.selectedLot;
     if (lot == null) {
-      return const EmptyState(
-          icon: Icons.error_outline_rounded, text: 'Lot unavailable.');
+      return EmptyState(
+          icon: Icons.error_outline_rounded, text: c.t('lotUnavailable'));
     }
     if (lot.recyclerConfirmed) {
       return ListView(padding: const EdgeInsets.all(16), children: [
-        const InfoBand(
+        InfoBand(
             icon: Icons.verified_rounded,
-            title: 'Receipt already confirmed',
-            body: 'Duplicate handover confirmation is blocked.'),
+            title: c.t('receiptAlreadyConfirmed'),
+            body: c.t('duplicateHandoverBlocked')),
         const SizedBox(height: 12),
         PrimaryButton(
             label: c.t('payment'),
@@ -259,11 +269,11 @@ class _HandoverScreenV2State extends State<HandoverScreenV2> {
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(children: [
-            LabelValue('Expected weight',
+            LabelValue(c.t('expectedWeight'),
                 '${lot.totalWeightKg.toStringAsFixed(2)} kg'),
-            LabelValue('Quoted value', c.money(lot.totalEstimatedValue)),
-            LabelValue('Collection GPS', lot.collectionLocation.label),
-            LabelValue('Handover reference', lot.handoverReference),
+            LabelValue(c.t('quotedValue'), c.money(lot.totalEstimatedValue)),
+            LabelValue(c.t('collectionGps'), lot.collectionLocation.label),
+            LabelValue(c.t('handoverRef'), lot.handoverReference),
           ]),
         ),
       ),
@@ -274,13 +284,13 @@ class _HandoverScreenV2State extends State<HandoverScreenV2> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Handover photograph',
-                  style: TextStyle(fontWeight: FontWeight.w900)),
+              Text(c.t('handoverPhoto'),
+                  style: const TextStyle(fontWeight: FontWeight.w900)),
               const SizedBox(height: 4),
               Text(
                 lot.handoverImageBase64 == null
-                    ? 'Optional evidence photo not added.'
-                    : 'Evidence photo saved locally.',
+                    ? c.t('photoNotAdded')
+                    : c.t('photoSavedLocally'),
                 style: const TextStyle(color: textMuted),
               ),
               const SizedBox(height: 8),
@@ -289,7 +299,7 @@ class _HandoverScreenV2State extends State<HandoverScreenV2> {
                   child: OutlinedButton.icon(
                     onPressed: () => c.addHandoverPhoto(ImageSource.camera),
                     icon: const Icon(Icons.camera_alt_rounded),
-                    label: const Text('Camera'),
+                    label: Text(c.t('camera')),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -297,7 +307,7 @@ class _HandoverScreenV2State extends State<HandoverScreenV2> {
                   child: OutlinedButton.icon(
                     onPressed: () => c.addHandoverPhoto(ImageSource.gallery),
                     icon: const Icon(Icons.photo_library_rounded),
-                    label: const Text('Gallery'),
+                    label: Text(c.t('gallery')),
                   ),
                 ),
               ]),
@@ -309,17 +319,17 @@ class _HandoverScreenV2State extends State<HandoverScreenV2> {
       TextField(
           controller: weight,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(
-              labelText: 'Final verified weight (kg)',
-              prefixIcon: Icon(Icons.scale_rounded)),
+          decoration: InputDecoration(
+              labelText: c.t('finalVerifiedWeight'),
+              prefixIcon: const Icon(Icons.scale_rounded)),
           onChanged: (_) => _check()),
       const SizedBox(height: 10),
       TextField(
           controller: value,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(
-              labelText: 'Final sale value (₹)',
-              prefixIcon: Icon(Icons.currency_rupee_rounded)),
+          decoration: InputDecoration(
+              labelText: c.t('finalSaleValue'),
+              prefixIcon: const Icon(Icons.currency_rupee_rounded)),
           onChanged: (_) => _check()),
       if (anomalyResult case final result?)
         Padding(
@@ -328,13 +338,13 @@ class _HandoverScreenV2State extends State<HandoverScreenV2> {
               icon: result.unusual
                   ? Icons.warning_amber_rounded
                   : Icons.check_circle_rounded,
-              title: result.unusual ? 'Rule-based warning' : 'Reference check',
+              title: result.unusual ? c.t('ruleWarning') : c.t('referenceCheck'),
               body: result.message,
               dangerStyle: result.unusual),
         ),
       const SizedBox(height: 12),
       PrimaryButton(
-          label: 'Confirm receipt',
+          label: c.t('confirmReceipt'),
           icon: Icons.verified_rounded,
           onPressed: () async {
             _check();
@@ -386,10 +396,10 @@ class _PaymentScreenV2State extends State<PaymentScreenV2> {
       ),
       const SizedBox(height: 12),
       if (method == PaymentMethod.upi)
-        const InfoBand(
+        InfoBand(
             icon: Icons.info_outline_rounded,
-            title: 'Digital payment is simulated',
-            body: 'No gateway transaction occurs in this prototype.'),
+            title: c.t('simulatedPayment'),
+            body: c.t('noGatewayNotice')),
       const SizedBox(height: 12),
       SegmentedButton<PaymentStatus>(
         segments: [
@@ -403,7 +413,7 @@ class _PaymentScreenV2State extends State<PaymentScreenV2> {
       ),
       const SizedBox(height: 16),
       PrimaryButton(
-          label: 'Save payment status',
+          label: c.t('savePaymentStatus'),
           icon: Icons.receipt_long_rounded,
           onPressed: () => c.finishPayment(method, status)),
     ]);
@@ -464,7 +474,7 @@ class LedgerScreenV2 extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           PageHeading(controller.t('earnings'),
-              'Persistent local lot and payment history.'),
+              controller.t('ledgerSub')),
           const SizedBox(height: 12),
           Row(children: [
             Expanded(
@@ -481,10 +491,10 @@ class LedgerScreenV2 extends StatelessWidget {
           ]),
           const SizedBox(height: 12),
           SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'all', label: Text('All')),
-              ButtonSegment(value: 'paid', label: Text('Paid')),
-              ButtonSegment(value: 'pending', label: Text('Pending')),
+            segments: [
+              ButtonSegment(value: 'all', label: Text(controller.t('filterAll'))),
+              ButtonSegment(value: 'paid', label: Text(controller.t('filterPaid'))),
+              ButtonSegment(value: 'pending', label: Text(controller.t('filterPending'))),
             ],
             selected: {controller.ledgerFilter},
             onSelectionChanged: (selected) {
@@ -494,17 +504,18 @@ class LedgerScreenV2 extends StatelessWidget {
           if (controller.userRole == UserRole.aggregator && pendingLots.length > 1) ...[
             const SizedBox(height: 12),
             PrimaryButton(
-              label: 'Consolidate ${pendingLots.length} Pending Lots',
+              label: '${controller.t('consolidateLots')} (${pendingLots.length})',
               icon: Icons.call_merge_rounded,
               onPressed: () => controller.go(WorkflowScreen.aggregateLots),
             ),
           ],
           const SizedBox(height: 12),
           if (controller.filteredLots.isEmpty)
-            const EmptyState(
+            EmptyState(
                 icon: Icons.receipt_long_outlined,
-                text: 'No lots in this filter.'),
-          ...controller.filteredLots.map((lot) => Padding(
+                text: controller.t('noLotsInFilter'))
+          else
+            ...controller.filteredLots.map((lot) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Card(
                   child: ListTile(
@@ -514,7 +525,7 @@ class LedgerScreenV2 extends StatelessWidget {
                     title: Text(lot.lotId,
                         style: const TextStyle(fontWeight: FontWeight.w900)),
                     subtitle: Text(
-                        '${lot.materials.length} material groups • ${lot.totalWeightKg.toStringAsFixed(2)} kg\n${lot.selectedRecyclerName.isEmpty ? 'Recycler not selected' : lot.selectedRecyclerName} • ${shortDate(lot.createdAt)}'),
+                        '${lot.materials.length} ${controller.t('materialGroups')} • ${lot.totalWeightKg.toStringAsFixed(2)} kg\n${lot.selectedRecyclerName.isEmpty ? controller.t('recyclerNotSelected') : lot.selectedRecyclerName} • ${shortDate(lot.createdAt)}'),
                     isThreeLine: true,
                     trailing: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -523,14 +534,14 @@ class LedgerScreenV2 extends StatelessWidget {
                           Text(controller.money(lot.ledgerValue),
                               style: const TextStyle(
                                   color: primary, fontWeight: FontWeight.w900)),
-                          Text(lot.paymentStatus.name,
+                          Text(controller.t(lot.paymentStatus.name),
                               style: TextStyle(
                                   fontSize: 12,
                                   color: lot.paymentStatus == PaymentStatus.paid
                                       ? primary
                                       : warning,
                                   fontWeight: FontWeight.w800)),
-                          Text(statusLabel(lot.status),
+                          Text(statusLabel(lot.status, controller.language),
                               style: const TextStyle(
                                   fontSize: 12, fontWeight: FontWeight.w700)),
                         ]),
@@ -551,42 +562,42 @@ class SyncScreenV2 extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           PageHeading(controller.t('sync'),
-              'Local records remain usable without a network.'),
+              controller.t('syncSub')),
           const SizedBox(height: 12),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Column(children: [
                 LabelValue(
-                    'Connection',
+                    controller.t('connectionLabel'),
                     controller.online
                         ? controller.t('online')
                         : controller.t('offline'),
                     strong: true),
-                LabelValue('Pending records', '${controller.pendingSyncCount}'),
-                LabelValue('Failed syncs', '${controller.failedSyncCount}'),
+                LabelValue(controller.t('pendingRecords'), '${controller.pendingSyncCount}'),
+                LabelValue(controller.t('failedSyncs'), '${controller.failedSyncCount}'),
                 LabelValue(
-                    'Last synced',
+                    controller.t('lastSynced'),
                     controller.lastSynced == null
-                        ? 'Never'
+                        ? controller.t('never')
                         : dateTimeLabel(controller.lastSynced!)),
               ]),
             ),
           ),
           const SizedBox(height: 12),
           PrimaryButton(
-              label: controller.syncing ? 'Syncing...' : controller.t('retry'),
+              label: controller.syncing ? controller.t('syncing') : controller.t('retry'),
               icon: Icons.sync_rounded,
               onPressed: !controller.online || controller.syncing
                   ? null
                   : controller.syncNow),
           if (!controller.online)
-            const Padding(
-                padding: EdgeInsets.only(top: 10),
+            Padding(
+                padding: const EdgeInsets.only(top: 10),
                 child: InfoBand(
                     icon: Icons.cloud_off_rounded,
-                    title: 'Offline',
-                    body: 'New lots are saved locally as Pending Sync.')),
+                    title: controller.t('offline'),
+                    body: controller.t('offlineNotice'))),
         ],
       );
 }
@@ -610,35 +621,35 @@ class RecyclerDashboardV2 extends StatelessWidget {
         0, (sum, lot) => sum + (lot.finalSaleValue ?? 0));
     return ListView(padding: const EdgeInsets.all(16), children: [
       PageHeading(controller.t('recycler'),
-          'Operational demo view for lot receipt and payment status.'),
+          controller.t('recyclerDashSub')),
       const SizedBox(height: 6),
-      const DemoLabel(text: 'Demo operational data'),
+      DemoLabel(text: controller.t('demoOperationalData')),
       const SizedBox(height: 12),
       Row(children: [
         Expanded(
             child: MetricTile(
-                label: 'Incoming',
+                label: controller.t('incoming'),
                 value: '${incoming.length}',
                 icon: Icons.move_to_inbox_rounded)),
         const SizedBox(width: 8),
         Expanded(
             child: MetricTile(
-                label: 'Today kg',
+                label: controller.t('todayKg'),
                 value: todayWeight.toStringAsFixed(1),
                 icon: Icons.scale_rounded)),
         const SizedBox(width: 8),
         Expanded(
             child: MetricTile(
-                label: 'Value',
+                label: controller.t('valueLabel'),
                 value: controller.money(todayValue),
                 icon: Icons.currency_rupee_rounded)),
       ]),
       const SizedBox(height: 14),
-      const Text('Incoming lots',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+      Text(controller.t('incomingLots'),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
       const SizedBox(height: 8),
       if (incoming.isEmpty)
-        const EmptyState(icon: Icons.inbox_rounded, text: 'No incoming lots.'),
+        EmptyState(icon: Icons.inbox_rounded, text: controller.t('noIncomingLots')),
       ...incoming.map((lot) => Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Card(
@@ -648,7 +659,7 @@ class RecyclerDashboardV2 extends StatelessWidget {
                 title: Text(lot.lotId,
                     style: const TextStyle(fontWeight: FontWeight.w900)),
                 subtitle: Text(
-                    '${lot.collectorId} • ${lot.materials.length} materials • ${lot.totalWeightKg.toStringAsFixed(2)} kg\n${lot.collectionLocation.label}'),
+                    '${lot.collectorId} • ${lot.materials.length} ${controller.t('materialsCount')} • ${lot.totalWeightKg.toStringAsFixed(2)} kg\n${lot.collectionLocation.label}'),
                 isThreeLine: true,
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => controller.selectLot(lot.lotId,
@@ -662,11 +673,11 @@ class RecyclerDashboardV2 extends StatelessWidget {
       OutlinedButton.icon(
           onPressed: () => controller.go(WorkflowScreen.scanQR),
           icon: const Icon(Icons.qr_code_scanner_rounded),
-          label: const Text('Scan Incoming Lot QR')),
+          label: Text(controller.t('scanIncomingQr'))),
       if (completed.isNotEmpty) ...[
         const SizedBox(height: 24),
-        const Text('Completed / In Facility',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+        Text(controller.t('completedInFacility'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
         const SizedBox(height: 8),
         ...completed.map((lot) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
@@ -681,11 +692,11 @@ class RecyclerDashboardV2 extends StatelessWidget {
                         children: [
                           Text(lot.lotId,
                               style: const TextStyle(fontWeight: FontWeight.w900)),
-                          _MetricChip(icon: Icons.inventory_rounded, label: lot.status.name),
+                          _MetricChip(icon: Icons.inventory_rounded, label: statusLabel(lot.status, controller.language)),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text('${lot.totalWeightKg.toStringAsFixed(2)} kg received',
+                      Text('${lot.totalWeightKg.toStringAsFixed(2)} kg ${controller.t('receivedWeight')}',
                           style: const TextStyle(color: textMuted)),
                       const SizedBox(height: 12),
                       if (lot.status == LotStatus.completed)
@@ -694,7 +705,7 @@ class RecyclerDashboardV2 extends StatelessWidget {
                           child: OutlinedButton.icon(
                             onPressed: () => controller.processLot(lot.lotId),
                             icon: const Icon(Icons.recycling_rounded),
-                            label: const Text('Mark Processed'),
+                            label: Text(controller.t('markProcessed')),
                           ),
                         ),
                     ],
@@ -738,7 +749,7 @@ class AggregateLotsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final pendingLots = controller.lots.where((l) => l.paymentStatus == PaymentStatus.pending && l.status == LotStatus.received).toList();
     if (pendingLots.isEmpty) {
-      return const EmptyState(icon: Icons.error_outline_rounded, text: 'No lots available to consolidate.');
+      return EmptyState(icon: Icons.error_outline_rounded, text: controller.t('noLotsToConsolidate'));
     }
     
     // Calculate total materials and weights
@@ -751,7 +762,7 @@ class AggregateLotsScreen extends StatelessWidget {
     final totalWeight = materialMap.values.fold<double>(0, (sum, weight) => sum + weight);
 
     return ListView(padding: const EdgeInsets.all(16), children: [
-      PageHeading('Consolidate Lots', 'Combine ${pendingLots.length} pending lots into a single large batch for downstream processing.'),
+      PageHeading(controller.t('consolidateLots'), 'Combine ${pendingLots.length} pending lots into a single large batch for downstream processing.'),
       const SizedBox(height: 12),
       Card(
         child: Padding(
@@ -759,7 +770,7 @@ class AggregateLotsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Source Lots', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+              Text(controller.t('sourceLots'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
               const SizedBox(height: 8),
               ...pendingLots.map((l) => Padding(
                 padding: const EdgeInsets.only(bottom: 4),
@@ -772,7 +783,7 @@ class AggregateLotsScreen extends StatelessWidget {
                 ),
               )),
               const Divider(height: 24),
-              const Text('Consolidated Batch', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+              Text(controller.t('consolidatedBatch'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
               const SizedBox(height: 8),
               ...materialMap.entries.map((e) => Padding(
                 padding: const EdgeInsets.only(bottom: 4),
@@ -788,7 +799,7 @@ class AggregateLotsScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Total Weight', style: TextStyle(fontWeight: FontWeight.w900)),
+                  Text(controller.t('totalWeight'), style: const TextStyle(fontWeight: FontWeight.w900)),
                   Text('${totalWeight.toStringAsFixed(2)} kg', style: const TextStyle(color: primary, fontWeight: FontWeight.w900)),
                 ],
               ),
@@ -798,7 +809,7 @@ class AggregateLotsScreen extends StatelessWidget {
       ),
       const SizedBox(height: 16),
       PrimaryButton(
-        label: 'Confirm Consolidation',
+        label: controller.t('confirmConsolidation'),
         icon: Icons.check_circle_rounded,
         onPressed: () => controller.aggregateLots(pendingLots.map((l) => l.lotId).toList()),
       ),
@@ -821,26 +832,26 @@ class _MakeOfferScreenV2State extends State<MakeOfferScreenV2> {
   Widget build(BuildContext context) {
     // We access the lot via ID because selectedLot getter is removed.
     final lotId = widget.controller.selectedLotId;
-    final lot = lotId != null ? widget.controller.lots.where((l) => l.lotId == lotId).firstOrNull : null;
-    if (lot == null) return const Center(child: Text('Lot unavailable'));
+    final lot = widget.controller.lots.where((l) => l.lotId == lotId).firstOrNull;
+    if (lot == null) return Center(child: Text(widget.controller.t('lotUnavailable')));
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const PageHeading('Make Offer', 'Submit a custom offer for this lot'),
+        PageHeading(widget.controller.t('makeOfferTitle'), widget.controller.t('makeOfferSub')),
         const SizedBox(height: 16),
         TextFormField(
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Offer Price per kg (₹)', border: OutlineInputBorder()),
+          decoration: InputDecoration(labelText: widget.controller.t('offerPriceLabel'), border: const OutlineInputBorder()),
           onChanged: (v) => setState(() => _offerPrice = double.tryParse(v)),
         ),
         const SizedBox(height: 24),
         PrimaryButton(
-          label: 'Submit Offer',
+          label: widget.controller.t('submitOffer'),
           icon: Icons.check_circle_rounded,
           onPressed: _offerPrice != null
               ? () {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Offer submitted')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(widget.controller.t('offerSubmitted'))));
                   widget.controller.go(WorkflowScreen.recyclerDashboard);
                 }
               : null,

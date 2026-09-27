@@ -7,11 +7,15 @@ import 'package:kabadiwala_connect/repositories/workflow_repositories.dart';
 
 class WidgetMemoryRepository implements LocalRepository {
   CollectorProfile? profile;
+  RecyclerProfile? recyclerProfile;
   List<DigitalLot> lots = [];
   DateTime? lastSync;
 
   @override
-  Future<void> clearProfile() async => profile = null;
+  Future<void> clearProfile() async {
+    profile = null;
+    recyclerProfile = null;
+  }
   @override
   Future<DateTime?> loadLastSync() async => lastSync;
   @override
@@ -19,11 +23,16 @@ class WidgetMemoryRepository implements LocalRepository {
   @override
   Future<CollectorProfile?> loadProfile() async => profile;
   @override
+  Future<RecyclerProfile?> loadRecyclerProfile() async => recyclerProfile;
+  @override
   Future<void> saveLastSync(DateTime value) async => lastSync = value;
   @override
   Future<void> saveLots(List<DigitalLot> value) async => lots = [...value];
   @override
   Future<void> saveProfile(CollectorProfile value) async => profile = value;
+  @override
+  Future<void> saveRecyclerProfile(RecyclerProfile value) async =>
+      recyclerProfile = value;
 }
 
 class WidgetRemoteRepository implements RemoteRepository {
@@ -81,6 +90,8 @@ void main() {
     )..setLanguage('en');
     addTearDown(controller.dispose);
     await tester.pumpWidget(MinistryApp(controller: controller));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Collector / Kabadiwala'));
     await tester.pumpAndSettle();
 
     FilledButton continueButton() => tester.widget<FilledButton>(find.ancestor(
@@ -182,6 +193,8 @@ void main() {
             of: find.byType(ListView), matching: find.byType(Scrollable))
         .first;
     expect(find.text('Simple, safer scrap collection'), findsOneWidget);
+    await tester.tap(find.text('Collector / Kabadiwala'));
+    await tester.pumpAndSettle();
 
     await tester.enterText(
         find.widgetWithText(TextField, 'Kabadiwala number'), '55555');
@@ -235,6 +248,8 @@ void main() {
 
     await tester.scrollUntilVisible(find.text('Find recycler'), 250,
         scrollable: pageScrollable());
+    await tester.drag(pageScrollable(), const Offset(0, -100));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Find recycler'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Demo recycler'), findsWidgets);
@@ -248,6 +263,8 @@ void main() {
 
     await tester.scrollUntilVisible(find.text('Confirm receipt'), 250,
         scrollable: pageScrollable());
+    await tester.drag(pageScrollable(), const Offset(0, -100));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Confirm receipt'));
     await tester.pumpAndSettle();
     expect(find.text('Payment'), findsWidgets);

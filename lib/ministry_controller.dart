@@ -1033,8 +1033,14 @@ class MinistryController extends ChangeNotifier {
     final service = tts;
     if (service == null) return;
     await service.stop();
-    await service.setLanguage(
-        language == 'mr' ? 'mr-IN' : (language == 'hi' ? 'hi-IN' : 'en-IN'));
+    await service.setLanguage(switch (language) {
+      'mr' => 'mr-IN',
+      'hi' => 'hi-IN',
+      'kn' => 'kn-IN',
+      'te' => 'te-IN',
+      'bn' => 'bn-IN',
+      _ => 'en-IN',
+    });
     await service.speak(message);
   }
 

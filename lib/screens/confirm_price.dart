@@ -30,9 +30,9 @@ class ConfirmScreen extends StatelessWidget {
         const SizedBox(height: 14),
         AppCard(
           color:
-              hasSuggestion ? const Color(0xFFECFDF5) : const Color(0xFFFFFBEB),
+              hasSuggestion ? primaryLight : saffronLight,
           borderColor:
-              hasSuggestion ? const Color(0xFFA7F3D0) : const Color(0xFFFDE68A),
+              hasSuggestion ? border : const Color(0xFFFCD34D),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -70,7 +70,7 @@ class ConfirmScreen extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(controller.t('manualFallback'),
                     style: const TextStyle(
-                        color: Color(0xFFD97706), fontWeight: FontWeight.w800)),
+                        color: saffronDark, fontWeight: FontWeight.w800)),
               ],
               if (controller.capturedImage != null &&
                   controller.detectionSource != 'demo') ...[
@@ -90,8 +90,8 @@ class ConfirmScreen extends StatelessWidget {
                   children: selected.recoverableMinerals
                       .map((mineral) => Pill(
                             '${controller.t('recoverable')}: $mineral',
-                            color: const Color(0xFFE0F2FE),
-                            textColor: secondary,
+                            color: primaryLight,
+                            textColor: primary,
                           ))
                       .toList(),
                 ),
@@ -125,7 +125,7 @@ class ConfirmScreen extends StatelessWidget {
                     color: selected
                         ? primary
                         : item.isHazardous
-                            ? const Color(0xFFFCA5A5)
+                            ? accentBorder
                             : border,
                     width: selected ? 2 : 1,
                   ),
@@ -149,15 +149,15 @@ class ConfirmScreen extends StatelessWidget {
                           .take(2)
                           .map((mineral) => Pill(
                                 mineral,
-                                color: const Color(0xFFE0F2FE),
-                                textColor: secondary,
+                                color: primaryLight,
+                                textColor: primary,
                               ))
                           .toList(),
                     ),
                     if (item.isHazardous) ...[
                       const SizedBox(height: 5),
                       Pill('⚠️ ${controller.t('hazardous')}',
-                          color: const Color(0xFFFEE2E2), textColor: danger),
+                          color: accentLight, textColor: danger),
                     ],
                   ],
                 ),
@@ -359,12 +359,12 @@ class PriceScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFFA7D7AA), width: 1.5),
-              boxShadow: const [
+              border: Border.all(color: border, width: 1.5),
+              boxShadow: [
                 BoxShadow(
-                    color: Color(0x161B5E20),
+                    color: primary.withValues(alpha: .08),
                     blurRadius: 14,
-                    offset: Offset(0, 5))
+                    offset: const Offset(0, 5))
               ],
             ),
             child: Column(
@@ -426,19 +426,19 @@ class PriceScreen extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
                   decoration: BoxDecoration(
-                      color: const Color(0xFFFEF3C7),
+                      color: saffronLight,
                       borderRadius: BorderRadius.circular(12)),
                   child: Row(
                     children: [
                       Expanded(
                           child: Text(controller.t('extraValue'),
                               style: const TextStyle(
-                                  color: Color(0xFF92400E),
+                                  color: saffronDark,
                                   fontWeight: FontWeight.w800))),
                       Text(
                           '+${controller.formatCurrency(controller.potentialExtra)}',
                           style: const TextStyle(
-                              color: Color(0xFFB45309),
+                              color: secondary,
                               fontSize: 19,
                               fontWeight: FontWeight.w900)),
                     ],

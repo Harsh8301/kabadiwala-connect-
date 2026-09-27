@@ -1,7 +1,6 @@
 import 'dart:convert';
 import '../models/dataset_models.dart';
 import '../models/workflow_models.dart';
-import '../data/ministry_data.dart';
 import 'package:crypto/crypto.dart';
 
 class DatasetService {
@@ -71,7 +70,7 @@ class DatasetService {
 
   /// Hashes a collector's phone number or ID to remove PII
   static String _anonymize(String identifier) {
-    final bytes = utf8.encode(identifier + "SALT_2026");
+    final bytes = utf8.encode('${identifier}SALT_2026');
     final digest = sha256.convert(bytes);
     return digest.toString().substring(0, 12);
   }

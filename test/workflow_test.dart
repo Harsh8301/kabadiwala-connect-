@@ -7,11 +7,15 @@ import 'package:kabadiwala_connect/services/workflow_services.dart';
 
 class MemoryLocalRepository implements LocalRepository {
   CollectorProfile? profile;
+  RecyclerProfile? recyclerProfile;
   List<DigitalLot> lots = [];
   DateTime? lastSync;
 
   @override
-  Future<void> clearProfile() async => profile = null;
+  Future<void> clearProfile() async {
+    profile = null;
+    recyclerProfile = null;
+  }
   @override
   Future<DateTime?> loadLastSync() async => lastSync;
   @override
@@ -19,11 +23,16 @@ class MemoryLocalRepository implements LocalRepository {
   @override
   Future<CollectorProfile?> loadProfile() async => profile;
   @override
+  Future<RecyclerProfile?> loadRecyclerProfile() async => recyclerProfile;
+  @override
   Future<void> saveLastSync(DateTime value) async => lastSync = value;
   @override
   Future<void> saveLots(List<DigitalLot> value) async => lots = [...value];
   @override
   Future<void> saveProfile(CollectorProfile value) async => profile = value;
+  @override
+  Future<void> saveRecyclerProfile(RecyclerProfile value) async =>
+      recyclerProfile = value;
 }
 
 class CountingRemoteRepository implements RemoteRepository {
@@ -149,7 +158,7 @@ void main() {
     tearDown(() => controller.dispose());
 
     test('batch creates one consolidated persistent lot', () async {
-      await controller.saveProfile('9876543210', 'Pune');
+      await controller.saveProfile('9876543210', 'Pune', UserRole.collector);
       controller.startCollection(CollectionMode.batch);
       controller.addManualMaterial('pcb');
       controller.addManualMaterial('pcb');
@@ -167,7 +176,7 @@ void main() {
     });
 
     test('zero material weight prevents lot creation', () async {
-      await controller.saveProfile('9876543210', 'Pune');
+      await controller.saveProfile('9876543210', 'Pune', UserRole.collector);
       controller.startCollection(CollectionMode.batch);
       controller.addManualMaterial('battery');
       expect(await controller.createLot(), isNull);
@@ -176,7 +185,7 @@ void main() {
 
     test('receipt requires recycler and blocks duplicate confirmation',
         () async {
-      await controller.saveProfile('9876543210', 'Pune');
+      await controller.saveProfile('9876543210', 'Pune', UserRole.collector);
       controller.startCollection(CollectionMode.batch);
       controller.addManualMaterial('pcb');
       controller.updateMaterial(0, weightKg: 3.5);
@@ -191,7 +200,7 @@ void main() {
     });
 
     test('paid handover updates ledger totals and completed status', () async {
-      await controller.saveProfile('9876543210', 'Pune');
+      await controller.saveProfile('9876543210', 'Pune', UserRole.collector);
       controller.startCollection(CollectionMode.single);
       controller.addManualMaterial('motor');
       controller.updateMaterial(0, weightKg: 2);
@@ -220,7 +229,7 @@ void main() {
       'sync',
       'safety',
     ];
-    for (final language in ['en', 'hi', 'mr']) {
+    for (final language in ['en', 'hi', 'mr', 'kn', 'te', 'bn']) {
       for (final key in keys) {
         expect(mt(language, key), isNot(key));
       }

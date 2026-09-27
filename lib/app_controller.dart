@@ -356,6 +356,9 @@ class AppController extends ChangeNotifier {
     final locale = switch (language) {
       'mr' => 'mr-IN',
       'hi' => 'hi-IN',
+      'kn' => 'kn-IN',
+      'te' => 'te-IN',
+      'bn' => 'bn-IN',
       _ => 'en-IN',
     };
     final tts = _tts;
@@ -376,6 +379,12 @@ class AppController extends ChangeNotifier {
         '$name, वजन $weightKg किलो. अधिकृत संदर्भ अंदाज: $formalEstimate रुपये. स्थानिक अनौपचारिक भाव: $informalEstimate रुपये. अधिकृत केंद्रात अंदाजे $potentialExtra रुपये अतिरिक्त नफा मिळू शकतो.',
       'hi' =>
         '$name, वजन $weightKg किलो. अधिकृत संदर्भ अनुमान: $formalEstimate रुपये. स्थानीय भाव: $informalEstimate रुपये. अधिकृत केंद्र पर लगभग $potentialExtra रुपये अतिरिक्त लाभ मिल सकता है।',
+      'kn' =>
+        '$name, ತೂಕ $weightKg ಕೆಜಿ. ಅಧಿಕೃತ ಉಲ್ಲೇಖ ಅಂದಾಜು: $formalEstimate ರೂಪಾಯಿಗಳು. ಸಾಮಾನ್ಯ ಅನೌಪಚಾರಿಕ ದರ: $informalEstimate ರೂಪಾಯಿಗಳು. ಸಂಭಾವ್ಯ ಹೆಚ್ಚುವರಿ ಮೌಲ್ಯ: $potentialExtra ರೂಪಾಯಿಗಳು.',
+      'te' =>
+        '$name, బరువు $weightKg కేజీలు. అధికారిక రిఫరెన్స్ అంచనా: $formalEstimate రూపాయలు. సాధారణ అనధికారిక ధర: $informalEstimate రూపాయలు. సంభావ్య అదనపు విలువ: $potentialExtra రూపాయలు.',
+      'bn' =>
+        '$name, ওজন $weightKg কেজি. আনুষ্ঠানিক রেফারেন্স প্রাক্কলন: $formalEstimate টাকা. সাধারণ অনানুষ্ঠানিক দর: $informalEstimate টাকা. সম্ভাব্য অতিরিক্ত মূল্য: $potentialExtra টাকা.',
       _ =>
         '$name, weight $weightKg kilograms. Formal reference estimate: $formalEstimate rupees. Typical informal price: $informalEstimate rupees. Potential additional value: $potentialExtra rupees.',
     };
@@ -520,38 +529,59 @@ class AppController extends ChangeNotifier {
           'अंदाजे ~${(weight * 650).round()} ग्रॅम तांबे पुनर्प्राप्ती क्षमता',
           'लगभग ~${(weight * 650).round()} ग्राम तांबा पुनर्प्राप्ति क्षमता',
           'Estimated ~${(weight * 650).round()}g Recoverable Pure Copper',
+          'ಅಂದಾಜು ~${(weight * 650).round()} ಗ್ರಾಂ ಮರುಪಡೆಯಬಹುದಾದ ಶುದ್ಧ ತಾಮ್ರ',
+          'సుమారు ~${(weight * 650).round()} గ్రాముల స్వచ్ఛమైన రాగి పునరుద్ధరణ',
+          'আনুমানিক ~${(weight * 650).round()} গ্রাম পুনরুদ্ধারযোগ্য বিশুদ্ধ তামা',
         ],
       'pcb' => <String>[
           'अंदाजे ~${(weight * .2).toStringAsFixed(2)} ग्रॅम सोने-समतुल्य व ~${(weight * 100).round()} ग्रॅम तांबे',
           'लगभग ~${(weight * .2).toStringAsFixed(2)} ग्राम सोना-समकक्ष व ~${(weight * 100).round()} ग्राम तांबा',
           'Estimated ~${(weight * .2).toStringAsFixed(2)}g Gold-equivalent & ~${(weight * 100).round()}g Copper',
+          'ಅಂದಾಜು ~${(weight * .2).toStringAsFixed(2)} ಗ್ರಾಂ ಚಿನ್ನದ ಸಮಾನ & ~${(weight * 100).round()} ಗ್ರಾಂ ತಾಮ್ರ',
+          'సుమారు ~${(weight * .2).toStringAsFixed(2)} గ్రాముల బంగారం సమానం & ~${(weight * 100).round()} గ్రాముల రాగి',
+          'আনুমানিক ~${(weight * .2).toStringAsFixed(2)} গ্রাম স্বর্ণ-সমতুল্য এবং ~${(weight * 100).round()} গ্রাম তামা',
         ],
       'battery' => <String>[
           'अंदाजे ~${(weight * 50).round()} ग्रॅम कोबाल्ट/लिथियम सुरक्षित विल्हेवाट',
           'लगभग ~${(weight * 50).round()} ग्राम कोबाल्ट/लिथियम सुरक्षित निपटान',
           'Estimated ~${(weight * 50).round()}g Cobalt/Lithium safely contained',
+          'ಅಂದಾಜು ~${(weight * 50).round()} ಗ್ರಾಂ ಕೋಬಾಲ್ಟ್/ಲಿಥಿಯಂ ಸುರಕ್ಷಿತ ವಿಲೇವಾರಿ',
+          'సుమారు ~${(weight * 50).round()} గ్రాముల కోబాల్ట్/లిథియం సురక్షిత నిల్వ',
+          'আনুমানিক ~${(weight * 50).round()} গ্রাম কোবাল্ট/লিথিয়াম নিরাপদে সংরক্ষিত',
         ],
       'motor' => <String>[
           'अंदाजे ~${(weight * 300).round()} ग्रॅम कॉइल तांबे पुनर्प्राप्ती क्षमता',
           'लगभग ~${(weight * 300).round()} ग्राम कॉइल तांबा पुनर्प्राप्ति क्षमता',
           'Estimated ~${(weight * 300).round()}g Winding Copper Recovery',
+          'ಅಂದಾಜು ~${(weight * 300).round()} ಗ್ರಾಂ ತಾಮ್ರದ ವೈಂಡಿಂಗ್ ಮರುಪಡೆಯುವಿಕೆ',
+          'సుమారు ~${(weight * 300).round()} గ్రాముల వైండింగ్ రాగి పునరుద్ధరణ',
+          'আনুমানিক ~${(weight * 300).round()} গ্রাম ওয়াইন্ডিং তামা পুনরুদ্ধার',
         ],
       'crt' => <String>[
           'अंदाजे ~${(weight * 150).round()} ग्रॅम विषारी शिसे सुरक्षित नियंत्रण',
           'लगभग ~${(weight * 150).round()} ग्राम जहरीला लेड सुरक्षित निस्तारण',
           'Estimated ~${(weight * 150).round()}g Toxic Lead kept out of soil',
+          'ಅಂದಾಜು ~${(weight * 150).round()} ಗ್ರಾಂ ವಿಷಕಾರಿ ಸೀಸ ಸುರಕ್ಷಿತ ನಿಯಂತ್ರಣ',
+          'సుమారు ~${(weight * 150).round()} గ్రాముల విషపూరిత సీసం సురక్షిత నిర్వహణ',
+          'আনুমানিক ~${(weight * 150).round()} গ্রাম বিষাক্ত সীসা নিরাপদে সংরক্ষিত',
         ],
       _ => <String>[
           'अंदाजे ~${(weight * 100).round()} ग्रॅम पुनर्वापरयोग्य धातू क्षमता',
           'लगभग ~${(weight * 100).round()} ग्राम रीसाइक्लेबल धातु क्षमता',
           'Estimated ~${(weight * 100).round()}g Recoverable Mixed Metals',
+          'ಅಂದಾಜು ~${(weight * 100).round()} ಗ್ರಾಂ ಮರುಪಡೆಯಬಹುದಾದ ಮಿಶ್ರ ಲೋಹಗಳು',
+          'సుమారు ~${(weight * 100).round()} గ్రాముల మిశ్రమ లోహాల పునరుద్ధరణ',
+          'আনুমানিক ~${(weight * 100).round()} গ্রাম পুনরুদ্ধারযোগ্য মিশ্র ধাতু',
         ],
     };
-    return values[language == 'mr'
-        ? 0
-        : language == 'hi'
-            ? 1
-            : 2];
+    return values[switch (language) {
+      'mr' => 0,
+      'hi' => 1,
+      'kn' => 3,
+      'te' => 4,
+      'bn' => 5,
+      _ => 2,
+    }];
   }
 
   String _generateLotId() =>
