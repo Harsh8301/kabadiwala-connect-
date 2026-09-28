@@ -34,6 +34,50 @@ class _AuthScreenState extends State<AuthScreen> {
   bool get _validEmail => RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email.text.trim());
   bool get _validPassword => password.text.length >= 6;
 
+  void _showLanguageSelector() {
+    final c = widget.controller;
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(c.t('chooseLanguage'),
+                  style: Theme.of(context).textTheme.titleLarge),
+            ),
+            const SizedBox(height: 8),
+            for (final option in const [
+              ('en', 'English'),
+              ('hi', 'हिन्दी'),
+              ('mr', 'मराठी'),
+              ('kn', 'ಕನ್ನಡ'),
+              ('te', 'తెలుగు'),
+              ('bn', 'বাংলা'),
+            ])
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                leading: Icon(
+                  c.language == option.$1
+                      ? Icons.check_circle_rounded
+                      : Icons.circle_outlined,
+                  color: c.language == option.$1 ? primary : textMuted,
+                ),
+                title: Text(option.$2,
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                onTap: () {
+                  c.setLanguage(option.$1);
+                  Navigator.pop(sheetContext);
+                },
+              ),
+          ]),
+        ),
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     final c = widget.controller;
     final cloud = c.cloud;
@@ -86,7 +130,20 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton.filledTonal(
+                  tooltip: c.t('language'),
+                  onPressed: _showLanguageSelector,
+                  style: IconButton.styleFrom(
+                    foregroundColor: primary,
+                    backgroundColor: primaryLight,
+                  ),
+                  icon: const Icon(Icons.language_rounded),
+                ),
+              ),
+              const SizedBox(height: 8),
               ScreenHeading(title: c.t('authTitle'), subtitle: c.t('authSubtitle')),
               const SizedBox(height: 24),
               AppCard(
