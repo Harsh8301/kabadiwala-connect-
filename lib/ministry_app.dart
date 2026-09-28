@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'data/ministry_data.dart';
 import 'ministry_controller.dart';
 import 'screens/collection_workflow.dart';
 import 'screens/dashboard_reference.dart';
@@ -367,11 +368,21 @@ class _HomeBottomNavigation extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () {
-                  final data = DatasetService.generateDatasets(controller.lots);
-                  // In a real app this would save to a file or share it. 
-                  // For the demo we just print it to show it works.
-                  debugPrint('Datasets Generated: ${data.keys.join(', ')}');
+                onPressed: () async {
+                  final data = DatasetService.generateDatasets(
+                    controller.lots,
+                    materials: materialCatalog,
+                    prices: demoPrices,
+                    recyclers: demoRecyclers,
+                  );
+                  final history =
+                      await DatasetSnapshotRepository().recordSnapshot(data);
+                  // In a real app this would save to a file or share it.
+                  // For the demo we log the generated/validated counts and the
+                  // growing snapshot history to show the pipeline is real.
+                  debugPrint('Datasets generated: ${data['meta']}');
+                  debugPrint('Snapshot history (${history.length} runs): $history');
+                  if (!sheetContext.mounted) return;
                   ScaffoldMessenger.of(sheetContext).showSnackBar(SnackBar(content: Text(controller.t('datasetsLogged'))));
                 },
                 icon: const Icon(Icons.download_rounded),

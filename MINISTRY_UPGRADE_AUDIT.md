@@ -54,6 +54,7 @@ Partially implemented or UI-only before this upgrade:
 | Meaningful QR route | Partial | Complete | QR serializes the local traceability record; lot detail resolves it locally |
 | GPS and denial state | Complete | Complete | Real permission path retained; demo location is explicitly labelled |
 | Recycler dataset | Partial | Complete (demo) | Typed replaceable records; every entry says verification required |
+| Dataset architecture (material/price/recycler/transaction/traceability/collector/AI-ML) | Partial (transaction/traceability/collector only) | Complete (demo) | `DatasetService.generateDatasets` builds all seven PS-required datasets from the live catalog, price board, recycler registry and lots; drops invalid rows (no weight/no image) and reports counts; `DatasetSnapshotRepository` persists an append-only generation history to show the dataset is generated/stored/updated repeatedly, not a static file |
 | Recycler matching | Partial | Complete (rule-based) | Compatibility, distance, rates, pickup and visible reasons/score |
 | Recycler details/actions | Partial | Partial | Select and pickup state work; call/directions clearly report unsupported integration |
 | Recycler dashboard | Partial | Complete (demo) | Incoming lots, weight/value metrics, open/confirm flow |
@@ -86,6 +87,12 @@ Partially implemented or UI-only before this upgrade:
   responsibilities
 - Existing secure `DetectionService`, theme, GPS, QR, image picker, and TTS are
   reused rather than replaced
+- `dataset_models.dart` / `dataset_service.dart`: typed Material, Price,
+  Recycler, Transaction, Traceability, Collector and AI/ML dataset records,
+  generated from the catalog/price board/recycler registry/lots, validated
+  (invalid rows dropped and counted), and snapshotted over time via
+  `DatasetSnapshotRepository`; AI/ML rows carry documented source, quality
+  and limitations (`AiMlDatasetProvenance`)
 
 ## E. Real and demo functionality
 
