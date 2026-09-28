@@ -119,6 +119,26 @@ class _AuthScreenState extends State<AuthScreen> {
     if (mounted) setState(() => submitting = false);
   }
 
+  Future<void> _signInWithGoogle() async {
+    final cloud = widget.controller.cloud;
+    if (cloud == null || submitting) return;
+    setState(() {
+      submitting = true;
+      error = null;
+    });
+    try {
+      // This hands off to Google in the browser/OS; on success the app
+      // resumes with a session and _MinistryAppState's auth-state listener
+      // moves past this screen — there's no synchronous result to await here.
+      await cloud.signInWithGoogle();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => error = widget.controller.t('authGenericError'));
+    } finally {
+      if (mounted) setState(() => submitting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
@@ -131,19 +151,38 @@ class _AuthScreenState extends State<AuthScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton.filledTonal(
-                  tooltip: c.t('language'),
-                  onPressed: _showLanguageSelector,
-                  style: IconButton.styleFrom(
-                    foregroundColor: primary,
-                    backgroundColor: primaryLight,
+              SizedBox(
+                height: MediaQuery.sizeOf(context).width < 380 ? 86 : 98,
+                child: Stack(alignment: Alignment.topCenter, children: [
+                  Center(
+                    child: Semantics(
+                      image: true,
+                      label: 'Kabadiwala Connect logo',
+                      child: Image.asset(
+                        'assets/branding/kabadiwala_connect_logo.png',
+                        width: MediaQuery.sizeOf(context).width < 380 ? 178 : 205,
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.high,
+                      ),
+                    ),
                   ),
-                  icon: const Icon(Icons.language_rounded),
-                ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: IconButton.filledTonal(
+                      tooltip: c.t('language'),
+                      onPressed: _showLanguageSelector,
+                      style: IconButton.styleFrom(
+                        foregroundColor: primaryDark,
+                        backgroundColor: primaryLight,
+                        side: const BorderSide(color: border),
+                      ),
+                      icon: const Icon(Icons.language_rounded),
+                    ),
+                  ),
+                ]),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
               ScreenHeading(title: c.t('authTitle'), subtitle: c.t('authSubtitle')),
               const SizedBox(height: 24),
               AppCard(
@@ -199,6 +238,21 @@ class _AuthScreenState extends State<AuthScreen> {
                           confirmEmailNotice = null;
                         }),
                 child: Text(signUpMode ? c.t('authToggleToSignIn') : c.t('authToggleToSignUp')),
+              ),
+              const SizedBox(height: 8),
+              Row(children: [
+                const Expanded(child: Divider(color: border)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(c.t('orDivider'), style: const TextStyle(color: textMuted)),
+                ),
+                const Expanded(child: Divider(color: border)),
+              ]),
+              const SizedBox(height: 16),
+              SecondaryButton(
+                label: c.t('continueWithGoogle'),
+                icon: Icons.g_mobiledata_rounded,
+                onPressed: submitting || c.cloud == null ? null : _signInWithGoogle,
               ),
             ],
           ),

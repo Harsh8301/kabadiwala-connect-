@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'data/ministry_data.dart';
@@ -25,6 +27,7 @@ class _MinistryAppState extends State<MinistryApp> {
   late final bool ownsController;
   bool showSplash = true;
   bool initializationFailed = false;
+  StreamSubscription<bool>? _authSub;
 
   @override
   void initState() {
@@ -32,6 +35,14 @@ class _MinistryAppState extends State<MinistryApp> {
     ownsController = widget.controller == null;
     controller = widget.controller ?? MinistryController();
     controller.addListener(_refresh);
+    // OAuth (e.g. Google) completes without a page reload on mobile, so the
+    // one-time authGate check in load() won't re-run on its own — this
+    // listener moves the app past it as soon as a session appears.
+    _authSub = controller.cloud?.authStateChanges.listen((signedIn) {
+      if (signedIn && controller.screen == WorkflowScreen.authGate) {
+        controller.load();
+      }
+    });
     _initialize();
   }
 
@@ -54,6 +65,7 @@ class _MinistryAppState extends State<MinistryApp> {
   @override
   void dispose() {
     controller.removeListener(_refresh);
+    _authSub?.cancel();
     if (ownsController) controller.dispose();
     super.dispose();
   }
