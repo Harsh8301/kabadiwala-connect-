@@ -40,9 +40,6 @@ class SupabaseRemoteRepository implements RemoteRepository {
 
   String? get currentUserId => _client.auth.currentUser?.id;
 
-  Stream<bool> get authStateChanges =>
-      _client.auth.onAuthStateChange.map((state) => state.session != null);
-
   Future<AuthOutcome> signUp({
     required String email,
     required String password,
@@ -93,18 +90,6 @@ class SupabaseRemoteRepository implements RemoteRepository {
   }
 
   Future<void> signOut() => _client.auth.signOut();
-
-  /// Starts the Google OAuth flow. On web this redirects the whole page to
-  /// Google and back; the returned Future resolves once that redirect has
-  /// been launched, not once sign-in completes — completion is observed via
-  /// [authStateChanges] instead. Requires the Google provider to be enabled
-  /// in the Supabase dashboard (Authentication → Providers → Google) with a
-  /// Google Cloud OAuth client configured, and the app's origin listed under
-  /// Authentication → URL Configuration → Redirect URLs.
-  Future<void> signInWithGoogle() => _client.auth.signInWithOAuth(
-        OAuthProvider.google,
-        authScreenLaunchMode: LaunchMode.platformDefault,
-      );
 
   @override
   Future<void> uploadLot(DigitalLot lot) async {

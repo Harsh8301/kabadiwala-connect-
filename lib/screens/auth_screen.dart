@@ -119,142 +119,157 @@ class _AuthScreenState extends State<AuthScreen> {
     if (mounted) setState(() => submitting = false);
   }
 
-  Future<void> _signInWithGoogle() async {
-    final cloud = widget.controller.cloud;
-    if (cloud == null || submitting) return;
-    setState(() {
-      submitting = true;
-      error = null;
-    });
-    try {
-      // This hands off to Google in the browser/OS; on success the app
-      // resumes with a session and _MinistryAppState's auth-state listener
-      // moves past this screen — there's no synchronous result to await here.
-      await cloud.signInWithGoogle();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => error = widget.controller.t('authGenericError'));
-    } finally {
-      if (mounted) setState(() => submitting = false);
-    }
-  }
+  InputDecoration _fieldDecoration(String label) => InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: primary, width: 2),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
     final c = widget.controller;
     return Scaffold(
-      backgroundColor: appBackground,
+      backgroundColor: const Color(0xFFF3F3F3),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 8),
-              SizedBox(
-                height: MediaQuery.sizeOf(context).width < 380 ? 86 : 98,
-                child: Stack(alignment: Alignment.topCenter, children: [
-                  Center(
-                    child: Semantics(
-                      image: true,
-                      label: 'Kabadiwala Connect logo',
-                      child: Image.asset(
-                        'assets/branding/kabadiwala_connect_logo.png',
-                        width: MediaQuery.sizeOf(context).width < 380 ? 178 : 205,
-                        fit: BoxFit.contain,
-                        filterQuality: FilterQuality.high,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Stack(children: [
+                      Semantics(
+                        image: true,
+                        label: 'Kabadiwala Connect logo',
+                        child: Image.asset(
+                          'assets/branding/kabadiwala_connect_logo.png',
+                          width: 96,
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
+                        ),
                       ),
+                      Positioned(
+                        right: -8,
+                        top: -8,
+                        child: IconButton(
+                          tooltip: c.t('language'),
+                          onPressed: _showLanguageSelector,
+                          icon: const Icon(Icons.language_rounded, color: textMuted),
+                        ),
+                      ),
+                    ]),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(c.t('authTitle'),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.w500, color: textMain)),
+                        const SizedBox(height: 8),
+                        Text(c.t('authSubtitle'),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 14, color: textMuted)),
+                        const SizedBox(height: 28),
+                        TextField(
+                          controller: email,
+                          keyboardType: TextInputType.emailAddress,
+                          autocorrect: false,
+                          decoration: _fieldDecoration(c.t('emailLabel')),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: password,
+                          obscureText: true,
+                          decoration: _fieldDecoration(c.t('passwordLabel')),
+                          onChanged: (_) => setState(() {}),
+                          onSubmitted: (_) => _submit(),
+                        ),
+                        if (error != null) ...[
+                          const SizedBox(height: 16),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(error!, style: const TextStyle(color: danger, fontSize: 13)),
+                          ),
+                        ],
+                        if (confirmEmailNotice != null) ...[
+                          const SizedBox(height: 16),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(confirmEmailNotice!,
+                                style: const TextStyle(color: textMuted, fontSize: 13)),
+                          ),
+                        ],
+                        const SizedBox(height: 32),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            TextButton(
+                              onPressed: submitting
+                                  ? null
+                                  : () => setState(() {
+                                        signUpMode = !signUpMode;
+                                        error = null;
+                                        confirmEmailNotice = null;
+                                      }),
+                              child: Text(
+                                signUpMode ? c.t('authToggleToSignIn') : c.t('authToggleToSignUp'),
+                                style: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            FilledButton(
+                              onPressed:
+                                  submitting || !_validEmail || !_validPassword ? null : _submit,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24)),
+                              ),
+                              child: submitting
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2, color: Colors.white),
+                                    )
+                                  : Text(signUpMode ? c.t('signUpAction') : c.t('signInAction')),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: IconButton.filledTonal(
-                      tooltip: c.t('language'),
-                      onPressed: _showLanguageSelector,
-                      style: IconButton.styleFrom(
-                        foregroundColor: primaryDark,
-                        backgroundColor: primaryLight,
-                        side: const BorderSide(color: border),
-                      ),
-                      icon: const Icon(Icons.language_rounded),
-                    ),
-                  ),
-                ]),
+                ],
               ),
-              const SizedBox(height: 16),
-              ScreenHeading(title: c.t('authTitle'), subtitle: c.t('authSubtitle')),
-              const SizedBox(height: 24),
-              AppCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(c.t('emailLabel'),
-                        style: const TextStyle(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: email,
-                      keyboardType: TextInputType.emailAddress,
-                      autocorrect: false,
-                      decoration: const InputDecoration(border: OutlineInputBorder()),
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(c.t('passwordLabel'),
-                        style: const TextStyle(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: password,
-                      obscureText: true,
-                      decoration: const InputDecoration(border: OutlineInputBorder()),
-                      onChanged: (_) => setState(() {}),
-                      onSubmitted: (_) => _submit(),
-                    ),
-                  ],
-                ),
-              ),
-              if (error != null) ...[
-                const SizedBox(height: 12),
-                Text(error!, style: const TextStyle(color: danger)),
-              ],
-              if (confirmEmailNotice != null) ...[
-                const SizedBox(height: 12),
-                Text(confirmEmailNotice!, style: const TextStyle(color: textMuted)),
-              ],
-              const SizedBox(height: 20),
-              PrimaryButton(
-                label: signUpMode ? c.t('signUpAction') : c.t('signInAction'),
-                onPressed: submitting || !_validEmail || !_validPassword ? null : _submit,
-              ),
-              const SizedBox(height: 12),
-              if (submitting) const Center(child: CircularProgressIndicator()),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: submitting
-                    ? null
-                    : () => setState(() {
-                          signUpMode = !signUpMode;
-                          error = null;
-                          confirmEmailNotice = null;
-                        }),
-                child: Text(signUpMode ? c.t('authToggleToSignIn') : c.t('authToggleToSignUp')),
-              ),
-              const SizedBox(height: 8),
-              Row(children: [
-                const Expanded(child: Divider(color: border)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(c.t('orDivider'), style: const TextStyle(color: textMuted)),
-                ),
-                const Expanded(child: Divider(color: border)),
-              ]),
-              const SizedBox(height: 16),
-              SecondaryButton(
-                label: c.t('continueWithGoogle'),
-                icon: Icons.g_mobiledata_rounded,
-                onPressed: submitting || c.cloud == null ? null : _signInWithGoogle,
-              ),
-            ],
+            ),
           ),
         ),
       ),

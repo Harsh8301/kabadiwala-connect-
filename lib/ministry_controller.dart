@@ -193,6 +193,13 @@ class MinistryController extends ChangeNotifier {
       } else {
         screen = WorkflowScreen.home;
       }
+    } else {
+      // No local profile yet: either a first run, or (cloud mode) a brand
+      // new sign-in on this device where the profile hasn't been created
+      // locally yet. Without this, `screen` would stay stuck at whatever it
+      // was set to before this call (e.g. authGate right after signing in),
+      // requiring a manual page reload to reach onboarding.
+      screen = WorkflowScreen.onboarding;
     }
     lots
       ..clear()
@@ -202,6 +209,7 @@ class MinistryController extends ChangeNotifier {
     loading = false;
     notifyListeners();
     if (monitorConnectivity) {
+      await _connectivitySubscription?.cancel();
       _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
           (results) => setOnline(
               results.any((result) => result != ConnectivityResult.none)));
