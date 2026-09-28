@@ -19,8 +19,11 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   final email = TextEditingController();
   final password = TextEditingController();
+  final confirmPassword = TextEditingController();
   bool signUpMode = false;
   bool submitting = false;
+  bool obscurePassword = true;
+  bool obscureConfirmPassword = true;
   String? error;
   String? confirmEmailNotice;
 
@@ -28,11 +31,13 @@ class _AuthScreenState extends State<AuthScreen> {
   void dispose() {
     email.dispose();
     password.dispose();
+    confirmPassword.dispose();
     super.dispose();
   }
 
   bool get _validEmail => RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email.text.trim());
   bool get _validPassword => password.text.length >= 6;
+  bool get _passwordsMatch => !signUpMode || password.text == confirmPassword.text;
 
   void _showLanguageSelector() {
     final c = widget.controller;
@@ -81,7 +86,9 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _submit() async {
     final c = widget.controller;
     final cloud = c.cloud;
-    if (cloud == null || !_validEmail || !_validPassword || submitting) return;
+    if (cloud == null || !_validEmail || !_validPassword || !_passwordsMatch || submitting) {
+      return;
+    }
     setState(() {
       submitting = true;
       error = null;
@@ -119,10 +126,11 @@ class _AuthScreenState extends State<AuthScreen> {
     if (mounted) setState(() => submitting = false);
   }
 
-  InputDecoration _fieldDecoration(String label) => InputDecoration(
+  InputDecoration _fieldDecoration(String label, {Widget? suffixIcon}) => InputDecoration(
         labelText: label,
         filled: true,
         fillColor: Colors.white,
+        suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: border),
@@ -206,11 +214,56 @@ class _AuthScreenState extends State<AuthScreen> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: password,
-                          obscureText: true,
-                          decoration: _fieldDecoration(c.t('passwordLabel')),
+                          obscureText: obscurePassword,
+                          decoration: _fieldDecoration(
+                            c.t('passwordLabel'),
+                            suffixIcon: IconButton(
+                              tooltip: c.t(obscurePassword ? 'showPassword' : 'hidePassword'),
+                              icon: Icon(
+                                obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: textMuted,
+                              ),
+                              onPressed: () =>
+                                  setState(() => obscurePassword = !obscurePassword),
+                            ),
+                          ),
                           onChanged: (_) => setState(() {}),
-                          onSubmitted: (_) => _submit(),
+                          onSubmitted: (_) => signUpMode ? null : _submit(),
                         ),
+                        if (signUpMode) ...[
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: confirmPassword,
+                            obscureText: obscureConfirmPassword,
+                            decoration: _fieldDecoration(
+                              c.t('confirmPasswordLabel'),
+                              suffixIcon: IconButton(
+                                tooltip: c.t(
+                                    obscureConfirmPassword ? 'showPassword' : 'hidePassword'),
+                                icon: Icon(
+                                  obscureConfirmPassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: textMuted,
+                                ),
+                                onPressed: () => setState(
+                                    () => obscureConfirmPassword = !obscureConfirmPassword),
+                              ),
+                            ),
+                            onChanged: (_) => setState(() {}),
+                            onSubmitted: (_) => _submit(),
+                          ),
+                          if (confirmPassword.text.isNotEmpty && !_passwordsMatch) ...[
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(c.t('passwordMismatchError'),
+                                  style: const TextStyle(color: danger, fontSize: 13)),
+                            ),
+                          ],
+                        ],
                         if (error != null) ...[
                           const SizedBox(height: 16),
                           Align(
@@ -235,6 +288,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   ? null
                                   : () => setState(() {
                                         signUpMode = !signUpMode;
+                                        confirmPassword.clear();
                                         error = null;
                                         confirmEmailNotice = null;
                                       }),
@@ -244,8 +298,12 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             ),
                             FilledButton(
-                              onPressed:
-                                  submitting || !_validEmail || !_validPassword ? null : _submit,
+                              onPressed: submitting ||
+                                      !_validEmail ||
+                                      !_validPassword ||
+                                      !_passwordsMatch
+                                  ? null
+                                  : _submit,
                               style: FilledButton.styleFrom(
                                 backgroundColor: primary,
                                 foregroundColor: Colors.white,
