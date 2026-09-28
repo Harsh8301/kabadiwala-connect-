@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'data/ministry_data.dart';
 import 'ministry_controller.dart';
+import 'screens/auth_screen.dart';
 import 'screens/collection_workflow.dart';
 import 'screens/dashboard_reference.dart';
 import 'screens/traceability_workflow.dart';
@@ -141,8 +142,10 @@ class _AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onboarding = controller.screen == WorkflowScreen.onboarding;
+    final onboarding = controller.screen == WorkflowScreen.onboarding ||
+        controller.screen == WorkflowScreen.authGate;
     final child = switch (controller.screen) {
+      WorkflowScreen.authGate => AuthScreen(controller: controller),
       WorkflowScreen.onboarding => OnboardingScreen(controller: controller),
       WorkflowScreen.home => controller.userRole == UserRole.recycler
           ? RecyclerDashboardV2(controller: controller)
