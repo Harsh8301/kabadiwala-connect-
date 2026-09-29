@@ -91,6 +91,37 @@ class SupabaseRemoteRepository implements RemoteRepository {
 
   Future<void> signOut() => _client.auth.signOut();
 
+  /// Pushes the role/profile details chosen during onboarding to the
+  /// `profiles` row created at signup (which only has role/phone/language
+  /// as they were *at signup time*, before the user picked collector vs
+  /// aggregator vs recycler or filled in their name/facility). Best-effort:
+  /// callers should not block navigation on this — if it fails, the local
+  /// profile is still correct and this can be retried on the next save.
+  Future<void> updateProfile({
+    required UserRole role,
+    String? fullName,
+    String? phone,
+    String? language,
+    String? operatingLocation,
+    String? facilityName,
+    String? facilityLocation,
+    String? authorizationNumber,
+    List<String>? materialsAccepted,
+  }) async {
+    final userId = currentUserId;
+    if (userId == null) return;
+    final updates = <String, dynamic>{'role': role.name};
+    if (fullName != null) updates['full_name'] = fullName;
+    if (phone != null) updates['phone'] = phone;
+    if (language != null) updates['language'] = language;
+    if (operatingLocation != null) updates['operating_location'] = operatingLocation;
+    if (facilityName != null) updates['facility_name'] = facilityName;
+    if (facilityLocation != null) updates['facility_location'] = facilityLocation;
+    if (authorizationNumber != null) updates['authorization_number'] = authorizationNumber;
+    if (materialsAccepted != null) updates['materials_accepted'] = materialsAccepted;
+    await _client.from('profiles').update(updates).eq('id', userId);
+  }
+
   @override
   Future<void> uploadLot(DigitalLot lot) async {
     final userId = currentUserId;

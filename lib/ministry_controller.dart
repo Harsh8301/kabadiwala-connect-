@@ -316,6 +316,16 @@ class MinistryController extends ChangeNotifier {
       role: role,
     );
     await local.saveProfile(profile!);
+    final syncCloud = cloud;
+    if (syncCloud != null) {
+      unawaited(syncCloud.updateProfile(
+        role: role,
+        fullName: profile!.collectorName,
+        phone: profile!.collectorId,
+        language: language,
+        operatingLocation: profile!.operatingLocation,
+      ));
+    }
     lastError = '';
     screen = WorkflowScreen.home;
     _history.clear();
@@ -349,6 +359,19 @@ class MinistryController extends ChangeNotifier {
     );
     await local.saveRecyclerProfile(recyclerProfile!);
     await local.saveProfile(profile!);
+    final syncCloud = cloud;
+    if (syncCloud != null) {
+      unawaited(syncCloud.updateProfile(
+        role: UserRole.recycler,
+        fullName: recyclerProfile!.facilityName,
+        language: language,
+        operatingLocation: recyclerProfile!.facilityLocation,
+        facilityName: recyclerProfile!.facilityName,
+        facilityLocation: recyclerProfile!.facilityLocation,
+        authorizationNumber: recyclerProfile!.authorizationNumber,
+        materialsAccepted: recyclerProfile!.materialsAccepted,
+      ));
+    }
     lastError = '';
     screen = WorkflowScreen.recyclerDashboard;
     _history.clear();
