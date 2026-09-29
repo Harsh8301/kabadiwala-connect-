@@ -141,13 +141,13 @@ Recycler:
 
 Offline:
 
-`Local workflow -> Pending Sync -> Retry/reconnect -> Demo remote upload -> Synced`,
+`Local workflow -> Pending Sync -> Retry/reconnect -> Authenticated API upload -> Synced`,
 with lot ID and sync state preventing a second upload.
 
 ## H. Recommended next development steps
 
 1. Configure and validate the actual Roboflow model/classes using field images.
-2. Replace `DemoRemoteRepository` with authenticated collector/lot APIs.
+2. Configure the authenticated collector/lot API with PostgreSQL and verify two physical devices.
 3. Import verified recycler registrations and contacts from an authoritative registry.
 4. Connect a verified price feed while retaining cached reference records.
 5. Add a camera QR scanner and deep-linkable server lot route.

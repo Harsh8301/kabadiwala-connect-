@@ -32,7 +32,7 @@ String enumName(Enum value) => value.name;
 T enumByName<T extends Enum>(List<T> values, Object? value, T fallback) =>
     values.where((item) => item.name == value).firstOrNull ?? fallback;
 
-enum UserRole { collector, aggregator, recycler }
+enum UserRole { collector, aggregator, middleman, recycler, admin }
 
 class CollectorProfile {
   const CollectorProfile({

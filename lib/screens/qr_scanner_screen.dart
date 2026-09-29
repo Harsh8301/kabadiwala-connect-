@@ -23,15 +23,23 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     super.dispose();
   }
 
-  void _onDetect(BarcodeCapture capture) {
+  Future<void> _onDetect(BarcodeCapture capture) async {
     if (_isProcessing) return;
     final List<Barcode> barcodes = capture.barcodes;
     if (barcodes.isNotEmpty) {
       final code = barcodes.first.rawValue;
-      if (code != null && code.startsWith('KWC-')) {
+      if (code != null && (code.startsWith('KWC-') ||
+          RegExp(r'^(lot|batch):[0-9a-fA-F-]{36}$').hasMatch(code))) {
         setState(() => _isProcessing = true);
-        _scannerController.stop();
-        widget.controller.handleScannedLotId(code);
+        await _scannerController.stop();
+        await widget.controller.handleScannedLotId(code);
+        if (mounted && widget.controller.api.token != null &&
+            widget.controller.scannedAsset == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(widget.controller.lastError)));
+          setState(() => _isProcessing = false);
+          await _scannerController.start();
+        }
       }
     }
   }

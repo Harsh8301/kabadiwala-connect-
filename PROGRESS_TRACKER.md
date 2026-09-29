@@ -48,18 +48,18 @@ The complete end-to-end flow for scrap collectors:
 ## 🚧 Simulated / Work in Progress (Demo Features)
 These features are currently rule-based, mocked, or simulated and require backend/third-party integration for production:
 
-- [ ] **Remote Backend**: Currently using a deduplicating `DemoRemoteRepository`. Needs authenticated API for real remote sync.
-- [ ] **Live Market Prices**: Currently using seeded static rates and 7-day history graphs. Needs a verified live price feed.
+- [x] **Remote Backend**: Production uses authenticated PostgreSQL marketplace APIs. A deployed database is still required for device testing.
+- [x] **Price Board**: Production reads administrator-recorded rates from the backend. An external verified price feed is still optional.
 - [ ] **Verified Recyclers**: Recycler matching is based on local rule-based scoring. Needs an authoritative registry (e.g., CPCB/SPCB).
 - [ ] **Payment Gateway**: Payment preference (Cash vs. UPI) is a UI toggle. **No actual money transfer is processed**.
-- [ ] **Camera QR Scanner**: QR payloads resolve locally, but the live camera scanning integration for recyclers to scan physical devices is pending.
+- [x] **Camera QR Scanner**: Live lot and batch QR payloads fetch authorized backend records. Physical device testing remains.
 - [ ] **Production ML Classification**: Model depends on deployed Roboflow dataset; currently requires actual field image validation.
 
 ---
 
 ## 🚀 Recommended Next Steps
 1. **Model Validation**: Configure and validate the actual Roboflow model/classes using real field images.
-2. **API Replacement**: Swap out `DemoRemoteRepository` with the authenticated collector/lot production APIs.
+2. **Deployment**: Configure PostgreSQL and run cross-device tests with real installed clients.
 3. **Registry Integration**: Import verified recycler registrations and live price feeds.
-4. **QR Integration**: Implement the camera QR scanner for deep-linkable server lot routes.
+4. **QR Field Testing**: Validate camera scanning and backend lookup on physical devices.
 5. **Field Testing**: Run physical field studies with at least two collectors to test camera hardware, GPS denial states, offline reconnects, and low-memory behavior.

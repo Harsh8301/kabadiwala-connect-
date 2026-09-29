@@ -10,6 +10,7 @@ import 'widgets/common.dart' hide LabelValue;
 import 'screens/unit_economics.dart';
 import 'screens/qr_scanner_screen.dart';
 import 'models/workflow_models.dart';
+import 'screens/live_marketplace.dart';
 
 class MinistryApp extends StatefulWidget {
   const MinistryApp({super.key, this.controller});
@@ -73,7 +74,7 @@ class _MinistryAppState extends State<MinistryApp> {
                       }
                     : null,
               )
-            : _AppShell(controller: controller),
+            : _AppShell(controller: controller, liveMode: ownsController),
       );
 }
 
@@ -136,14 +137,18 @@ class _SplashScreen extends StatelessWidget {
 }
 
 class _AppShell extends StatelessWidget {
-  const _AppShell({required this.controller});
+  const _AppShell({required this.controller, required this.liveMode});
   final MinistryController controller;
+  final bool liveMode;
 
   @override
   Widget build(BuildContext context) {
-    final onboarding = controller.screen == WorkflowScreen.onboarding;
-    final child = switch (controller.screen) {
+    final needsLogin = liveMode &&
+        (controller.api.token == null || controller.profile == null);
+    final onboarding = needsLogin || controller.screen == WorkflowScreen.onboarding;
+    final child = needsLogin ? LiveAccountScreen(controller: controller) : switch (controller.screen) {
       WorkflowScreen.onboarding => OnboardingScreen(controller: controller),
+      WorkflowScreen.home when liveMode => LiveMarketplaceScreen(controller: controller),
       WorkflowScreen.home => controller.userRole == UserRole.recycler
           ? RecyclerDashboardV2(controller: controller)
           : HomeDashboard(controller: controller),
@@ -153,15 +158,20 @@ class _AppShell extends StatelessWidget {
       WorkflowScreen.review => MaterialReviewScreen(controller: controller),
       WorkflowScreen.priceBoard => PriceBoardScreen(controller: controller),
       WorkflowScreen.safety => SafetyScreenV2(controller: controller),
+      WorkflowScreen.lotDetail when liveMode => LiveMarketplaceScreen(controller: controller),
       WorkflowScreen.lotDetail => LotDetailScreenV2(controller: controller),
+      WorkflowScreen.recyclerMatch when liveMode => LiveMarketplaceScreen(controller: controller),
       WorkflowScreen.recyclerMatch =>
         RecyclerMatchScreenV2(controller: controller),
+      WorkflowScreen.handover when liveMode => LiveMarketplaceScreen(controller: controller),
       WorkflowScreen.handover => HandoverScreenV2(controller: controller),
       WorkflowScreen.payment => PaymentScreenV2(controller: controller),
       WorkflowScreen.ledger => LedgerScreenV2(controller: controller),
       WorkflowScreen.sync => SyncScreenV2(controller: controller),
+      WorkflowScreen.recyclerDashboard when liveMode => LiveMarketplaceScreen(controller: controller),
       WorkflowScreen.recyclerDashboard =>
         RecyclerDashboardV2(controller: controller),
+      WorkflowScreen.makeOffer when liveMode => LiveMarketplaceScreen(controller: controller),
       WorkflowScreen.makeOffer =>
         MakeOfferScreenV2(controller: controller),
       WorkflowScreen.schemes =>
@@ -179,8 +189,13 @@ class _AppShell extends StatelessWidget {
         if (!didPop) controller.back();
       },
       child: Scaffold(
-        appBar: onboarding || controller.screen == WorkflowScreen.home
-            ? null
+        appBar: onboarding ? null : liveMode && controller.screen == WorkflowScreen.home
+            ? AppBar(title: Text(controller.t('app')),actions:[
+                PopupMenuButton<String>(icon:const Icon(Icons.language),onSelected:controller.setLanguage,
+                  itemBuilder:(_)=>['en','hi','mr','kn','te','bn'].map((code)=>PopupMenuItem(value:code,child:Text(code.toUpperCase()))).toList()),
+                IconButton(onPressed:controller.logout,icon:const Icon(Icons.logout)),
+              ])
+            : controller.screen == WorkflowScreen.home ? null
             : AppBar(
                 leading: IconButton(
                     tooltip: controller.t('back'),
@@ -229,7 +244,7 @@ class _AppShell extends StatelessWidget {
             ),
           ),
         ),
-        bottomNavigationBar: controller.screen == WorkflowScreen.home
+        bottomNavigationBar: controller.screen == WorkflowScreen.home && !liveMode
             ? _HomeBottomNavigation(controller: controller)
             : null,
       ),

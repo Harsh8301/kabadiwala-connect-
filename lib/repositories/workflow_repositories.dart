@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/workflow_models.dart';
+import '../services/marketplace_api.dart';
 
 abstract interface class LocalRepository {
   Future<CollectorProfile?> loadProfile();
@@ -102,15 +103,10 @@ abstract interface class RemoteRepository {
   Future<void> uploadLot(DigitalLot lot);
 }
 
-class DemoRemoteRepository implements RemoteRepository {
-  DemoRemoteRepository({this.shouldFail = false});
-  final bool shouldFail;
-  final Set<String> uploadedLotIds = {};
+class ApiRemoteRepository implements RemoteRepository {
+  ApiRemoteRepository(this.api);
+  final MarketplaceApi api;
 
   @override
-  Future<void> uploadLot(DigitalLot lot) async {
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-    if (shouldFail) throw StateError('Demo sync failure');
-    uploadedLotIds.add(lot.lotId);
-  }
+  Future<void> uploadLot(DigitalLot lot) => api.uploadLot(lot);
 }

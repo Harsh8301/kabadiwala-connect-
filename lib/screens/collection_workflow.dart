@@ -466,7 +466,7 @@ class _MaterialEditor extends StatelessWidget {
     final detectedDefinition = item.detectedMaterialId == null
         ? null
         : materialCatalog[item.detectedMaterialId!];
-    final price = controller.valuation.priceFor(item.materialId);
+    final price = controller.priceForMaterial(item.materialId);
     final lowConfidence =
         item.sourceType.startsWith('ai') && item.confidence < .65;
     return Card(
@@ -601,7 +601,10 @@ class _MaterialEditor extends StatelessWidget {
             ),
           const Divider(),
           LabelValue(
-              'Reference rate', '${controller.money(price.buyingPrice)} / kg'),
+              controller.t('referenceRate'),
+              controller.api.token != null && price.buyingPrice == 0
+                  ? controller.t('rateUnavailable')
+                  : '${controller.money(price.buyingPrice)} / kg'),
           LabelValue(controller.t('estimatedValue'),
               controller.money(item.estimatedValue),
               strong: true),

@@ -14,6 +14,7 @@ import 'models/workflow_models.dart';
 import 'repositories/workflow_repositories.dart';
 import 'services/detection_service.dart';
 import 'services/workflow_services.dart';
+import 'services/marketplace_api.dart';
 
 enum WorkflowScreen {
   onboarding,
@@ -43,25 +44,29 @@ class MinistryController extends ChangeNotifier {
     RemoteRepository? remoteRepository,
     DetectionService? detectionService,
     ImagePicker? imagePicker,
+    MarketplaceApi? marketplaceApi,
     bool enableTts = true,
     bool? initialOnline,
     this.monitorConnectivity = true,
   })  : local = localRepository ?? SharedPreferencesLocalRepository(),
-        remote = remoteRepository ?? DemoRemoteRepository(),
+        api = marketplaceApi ?? MarketplaceApi(),
         detection = detectionService ?? DetectionService(),
         picker = imagePicker ?? ImagePicker(),
         tts = enableTts ? FlutterTts() : null,
         online = initialOnline ?? true {
+    remote = remoteRepository ?? ApiRemoteRepository(api);
     syncService = SyncService(local: local, remote: remote);
   }
 
   final LocalRepository local;
-  final RemoteRepository remote;
+  late final RemoteRepository remote;
+  final MarketplaceApi api;
   final DetectionService detection;
   final ImagePicker picker;
   final FlutterTts? tts;
   final bool monitorConnectivity;
   final valuation = const ValuationService();
+  List<Map<String, dynamic>> livePriceRecords = [];
   final recommendation = const RecyclerRecommendationService();
   final anomaly = const AnomalyDetectionService();
   late final SyncService syncService;
@@ -93,6 +98,7 @@ class MinistryController extends ChangeNotifier {
   bool locating = false;
   final List<DigitalLot> lots = [];
   String selectedLotId = '';
+  Map<String, dynamic>? scannedAsset;
   String selectedRecyclerId = '';
   PaymentMethod paymentMethod = PaymentMethod.cash;
   PaymentStatus paymentStatus = PaymentStatus.pending;
@@ -110,6 +116,22 @@ class MinistryController extends ChangeNotifier {
       .firstOrNull;
   double get draftWeight =>
       draftMaterials.fold(0, (sum, item) => sum + item.weightKg);
+  void setLivePrices(List<Map<String, dynamic>> records) {
+    livePriceRecords = records;
+    notifyListeners();
+  }
+  PriceRecord priceForMaterial(String materialId) {
+    if (api.token == null) return valuation.priceFor(materialId);
+    final matches = livePriceRecords.where((record) => record['material_id'] == materialId);
+    final location = profile?.operatingLocation ?? '';
+    final record = matches.where((item) => item['location'] == location).firstOrNull ?? matches.firstOrNull;
+    final rate = (record?['rate'] as num?)?.toDouble() ?? 0;
+    return PriceRecord(priceId: 'live', materialId: materialId,
+      location: record?['location']?.toString() ?? location,
+      updatedAt: DateTime.tryParse(record?['created_at']?.toString() ?? '') ?? DateTime.now(),
+      buyingPrice: rate, quotedPrice: rate, marketMin: rate, marketMax: rate,
+      unit: record?['unit']?.toString() ?? 'kg', recyclerId: '', history: const []);
+  }
   double get draftValue =>
       draftMaterials.fold(0, (sum, item) => sum + item.estimatedValue);
   bool get canCreateLot =>
@@ -160,7 +182,21 @@ class MinistryController extends ChangeNotifier {
       .toList();
 
   Future<void> load() async {
-    profile = await local.loadProfile();
+    if (remote is ApiRemoteRepository && await api.restore()) {
+      try {
+        final me = (await api.request('me'))['data'] as Map<String, dynamic>;
+        profile = CollectorProfile(
+          collectorId: me['id'].toString(),
+          collectorName: me['name']?.toString() ?? '',
+          language: me['language']?.toString() ?? 'en',
+          operatingLocation: me['location']?.toString() ?? '',
+          role: enumByName(UserRole.values,
+              me['role']?.toString().toLowerCase(), UserRole.collector),
+        );
+        await local.saveProfile(profile!);
+      } catch (_) { /* The login screen handles a stale session. */ }
+    }
+    profile ??= await local.loadProfile();
     recyclerProfile = await local.loadRecyclerProfile();
     if (profile != null) {
       language = profile!.language;
@@ -224,7 +260,11 @@ class MinistryController extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    if (remote is ApiRemoteRepository) await api.signOut();
     await local.clearProfile();
+    await local.saveLots([]);
+    lots.clear();
+    scannedAsset = null;
     profile = null;
     recyclerProfile = null;
     _history.clear();
@@ -289,6 +329,41 @@ class MinistryController extends ChangeNotifier {
     screen = WorkflowScreen.home;
     _history.clear();
     notifyListeners();
+  }
+
+  Future<void> signIn(String email, String password) async {
+    final user = await api.signIn(email, password);
+    await _openSession(user);
+  }
+
+  Future<void> register(String email, String password, String name,
+      UserRole role, String language, String location) async {
+    final user = await api.register(email, password, name, role, language, location);
+    Map<String, dynamic> profile = user;
+    try {
+      profile = (await api.request('me'))['data'] as Map<String, dynamic>;
+    } catch (_) {
+      // Registration has already committed; use its authenticated user response.
+    }
+    await _openSession(profile);
+  }
+
+  Future<void> _openSession(Map<String, dynamic> user) async {
+    profile = CollectorProfile(
+      collectorId: user['id'].toString(),
+      collectorName: user['name']?.toString() ?? '',
+      language: user['language']?.toString() ?? 'en',
+      operatingLocation: user['location']?.toString() ?? '',
+      role: enumByName(UserRole.values,
+          user['role']?.toString().toLowerCase(), UserRole.collector),
+    );
+    language = profile!.language;
+    lots.clear();
+    await local.saveLots([]);
+    await local.saveProfile(profile!);
+    screen = WorkflowScreen.home;
+    notifyListeners();
+    if (online) unawaited(syncNow());
   }
 
   Future<void> saveRecyclerProfile(
@@ -495,7 +570,7 @@ class MinistryController extends ChangeNotifier {
           confidence: candidate.confidence,
           imageIds: [imageId],
           estimatedValue: 0,
-          quotedRate: valuation.priceFor(id).buyingPrice,
+          quotedRate: priceForMaterial(id).buyingPrice,
           detectedMaterialId: id,
         ));
       }
@@ -529,7 +604,7 @@ class MinistryController extends ChangeNotifier {
         confidence: 1,
         imageIds: const [],
         estimatedValue: 0,
-        quotedRate: valuation.priceFor(materialId).buyingPrice,
+        quotedRate: priceForMaterial(materialId).buyingPrice,
         detectedMaterialId: null,
       ));
     }
@@ -545,7 +620,7 @@ class MinistryController extends ChangeNotifier {
       quantity: max(1, quantity ?? item.quantity).toInt(),
       weightKg: weight,
       condition: condition,
-      estimatedValue: valuation.estimate(item.materialId, weight),
+      estimatedValue: priceForMaterial(item.materialId).buyingPrice * weight,
     );
     notifyListeners();
   }
@@ -556,7 +631,7 @@ class MinistryController extends ChangeNotifier {
     safetyAcknowledgedMaterialIds
       ..remove(old.materialId)
       ..remove(materialId);
-    final rate = valuation.priceFor(materialId).buyingPrice;
+    final rate = priceForMaterial(materialId).buyingPrice;
     draftMaterials[index] = LotMaterial(
       materialId: materialId,
       quantity: old.quantity,
@@ -707,8 +782,11 @@ class MinistryController extends ChangeNotifier {
     lots.add(lot);
     selectedLotId = lotId;
     await _persistLots();
+    if (online && api.token != null) {
+      await syncNow();
+    }
     go(WorkflowScreen.lotDetail);
-    if (online) unawaited(syncNow());
+    if (online && api.token == null) unawaited(syncNow());
     return lot;
   }
 
@@ -719,7 +797,24 @@ class MinistryController extends ChangeNotifier {
         materials: target.materials, location: target.collectionLocation);
   }
 
-  void handleScannedLotId(String scannedId) {
+  Future<void> handleScannedLotId(String scannedId) async {
+    if (api.token != null) {
+      scannedAsset = null;
+      final parts = scannedId.split(':');
+      if (parts.length != 2 || !['lot', 'batch'].contains(parts[0])) return;
+      try {
+        final response = await api.request(parts[0] == 'lot' ? 'lots' : 'batches',
+            query: {'id': parts[1]});
+        scannedAsset = response['data'] as Map<String, dynamic>;
+        selectedLotId = parts[1];
+        lastError = '';
+        goHome();
+      } catch (_) {
+        lastError = t('lotUnavailable');
+        notifyListeners();
+      }
+      return;
+    }
     // Attempt to find the lot locally
     try {
       final lot = lots.firstWhere((l) => l.lotId == scannedId);
