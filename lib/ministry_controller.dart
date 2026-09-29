@@ -11,7 +11,6 @@ import 'package:image_picker/image_picker.dart';
 import 'data/ministry_data.dart';
 import 'models/detection_result.dart';
 import 'models/workflow_models.dart';
-import 'repositories/supabase_repository.dart';
 import 'repositories/workflow_repositories.dart';
 import 'services/detection_service.dart';
 import 'services/workflow_services.dart';
@@ -56,12 +55,7 @@ class MinistryController extends ChangeNotifier {
         tts = enableTts ? FlutterTts() : null,
         online = initialOnline ?? true {
     remote = remoteRepository ?? ApiRemoteRepository(api);
-    final remoteRef = remote;
-    syncService = SyncService(
-      local: local,
-      remote: remoteRef,
-      cloud: remoteRef is SupabaseRemoteRepository ? remoteRef : null,
-    );
+    syncService = SyncService(local: local, remote: remote);
   }
 
   final LocalRepository local;
@@ -76,13 +70,6 @@ class MinistryController extends ChangeNotifier {
   final recommendation = const RecyclerRecommendationService();
   final anomaly = const AnomalyDetectionService();
   late final SyncService syncService;
-
-  /// Non-null only if a `SupabaseRemoteRepository` was explicitly injected
-  /// via the constructor. The app no longer does this by default — login
-  /// was removed and every build runs local-only — but the backend
-  /// (schema, repository, auth/sync methods) is still here if that changes.
-  SupabaseRemoteRepository? get cloud =>
-      remote is SupabaseRemoteRepository ? remote as SupabaseRemoteRepository : null;
 
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   final List<WorkflowScreen> _history = [];
@@ -281,7 +268,6 @@ class MinistryController extends ChangeNotifier {
     await local.saveLots([]);
     lots.clear();
     scannedAsset = null;
-    await cloud?.signOut();
     profile = null;
     recyclerProfile = null;
     _history.clear();
@@ -342,16 +328,6 @@ class MinistryController extends ChangeNotifier {
       role: role,
     );
     await local.saveProfile(profile!);
-    final syncCloud = cloud;
-    if (syncCloud != null) {
-      unawaited(syncCloud.updateProfile(
-        role: role,
-        fullName: profile!.collectorName,
-        phone: profile!.collectorId,
-        language: language,
-        operatingLocation: profile!.operatingLocation,
-      ));
-    }
     lastError = '';
     screen = WorkflowScreen.home;
     _history.clear();
@@ -420,19 +396,6 @@ class MinistryController extends ChangeNotifier {
     );
     await local.saveRecyclerProfile(recyclerProfile!);
     await local.saveProfile(profile!);
-    final syncCloud = cloud;
-    if (syncCloud != null) {
-      unawaited(syncCloud.updateProfile(
-        role: UserRole.recycler,
-        fullName: recyclerProfile!.facilityName,
-        language: language,
-        operatingLocation: recyclerProfile!.facilityLocation,
-        facilityName: recyclerProfile!.facilityName,
-        facilityLocation: recyclerProfile!.facilityLocation,
-        authorizationNumber: recyclerProfile!.authorizationNumber,
-        materialsAccepted: recyclerProfile!.materialsAccepted,
-      ));
-    }
     lastError = '';
     screen = WorkflowScreen.recyclerDashboard;
     _history.clear();

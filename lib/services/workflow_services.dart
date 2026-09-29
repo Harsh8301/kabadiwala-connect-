@@ -4,7 +4,6 @@ import 'package:geolocator/geolocator.dart';
 
 import '../data/ministry_data.dart';
 import '../models/workflow_models.dart';
-import '../repositories/supabase_repository.dart';
 import '../repositories/workflow_repositories.dart';
 
 class ValuationService {
@@ -125,14 +124,9 @@ class AnomalyDetectionService {
 }
 
 class SyncService {
-  SyncService({required this.local, required this.remote, this.cloud});
+  SyncService({required this.local, required this.remote});
   final LocalRepository local;
   final RemoteRepository remote;
-  // Optional: when set (a real Supabase-backed session), sync also pulls
-  // lots where the signed-in user is seller or buyer, so a lot created on
-  // one device appears on another once both are signed into the same
-  // account. Left null in demo mode, where sync is upload-only as before.
-  final SupabaseRemoteRepository? cloud;
   bool _running = false;
 
   Future<List<DigitalLot>> sync(List<DigitalLot> source) async {
@@ -153,23 +147,6 @@ class SyncService {
         } catch (error) {
           lots[index] = lot.copyWith(
               syncState: SyncState.failed, lastSyncError: error.toString());
-        }
-      }
-
-      final remotePull = cloud;
-      if (remotePull != null) {
-        try {
-          final remoteLots = await remotePull.fetchLotsForCurrentUser();
-          for (final remoteLot in remoteLots) {
-            final index = lots.indexWhere((lot) => lot.lotId == remoteLot.lotId);
-            if (index == -1) {
-              lots.add(remoteLot);
-            } else if (lots[index].syncState == SyncState.synced) {
-              lots[index] = remoteLot;
-            }
-          }
-        } catch (_) {
-          // Best-effort pull; the upload results above still stand.
         }
       }
 
