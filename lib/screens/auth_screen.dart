@@ -160,21 +160,6 @@ class _AuthScreenState extends State<AuthScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton.filledTonal(
-                        tooltip: c.t('language'),
-                        onPressed: _showLanguageSelector,
-                        style: IconButton.styleFrom(
-                          foregroundColor: primary,
-                          backgroundColor: primaryLight,
-                        ),
-                        icon: const Icon(Icons.language_rounded),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
                   Center(
                     child: Semantics(
                       image: true,
@@ -189,7 +174,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                   const SizedBox(height: 12),
                   Container(
-                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 20),
+                    padding: const EdgeInsets.fromLTRB(24, 16, 12, 20),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
@@ -198,6 +183,16 @@ class _AuthScreenState extends State<AuthScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              tooltip: c.t('language'),
+                              onPressed: _showLanguageSelector,
+                              icon: const Icon(Icons.language_rounded, color: textMuted),
+                            ),
+                          ],
+                        ),
                         Text(c.t('authTitle'),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
