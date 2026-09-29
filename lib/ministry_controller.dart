@@ -8,7 +8,6 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'config/supabase_config.dart';
 import 'data/ministry_data.dart';
 import 'models/detection_result.dart';
 import 'models/workflow_models.dart';
@@ -18,7 +17,6 @@ import 'services/detection_service.dart';
 import 'services/workflow_services.dart';
 
 enum WorkflowScreen {
-  authGate,
   onboarding,
   home,
   collectionMode,
@@ -50,10 +48,7 @@ class MinistryController extends ChangeNotifier {
     bool? initialOnline,
     this.monitorConnectivity = true,
   })  : local = localRepository ?? SharedPreferencesLocalRepository(),
-        remote = remoteRepository ??
-            (SupabaseConfig.isConfigured
-                ? SupabaseRemoteRepository()
-                : DemoRemoteRepository()),
+        remote = remoteRepository ?? DemoRemoteRepository(),
         detection = detectionService ?? DetectionService(),
         picker = imagePicker ?? ImagePicker(),
         tts = enableTts ? FlutterTts() : null,
@@ -77,8 +72,10 @@ class MinistryController extends ChangeNotifier {
   final anomaly = const AnomalyDetectionService();
   late final SyncService syncService;
 
-  /// Non-null only when running against a real Supabase backend
-  /// (`SupabaseConfig.isConfigured`); null in local-only demo mode.
+  /// Non-null only if a `SupabaseRemoteRepository` was explicitly injected
+  /// via the constructor. The app no longer does this by default — login
+  /// was removed and every build runs local-only — but the backend
+  /// (schema, repository, auth/sync methods) is still here if that changes.
   SupabaseRemoteRepository? get cloud =>
       remote is SupabaseRemoteRepository ? remote as SupabaseRemoteRepository : null;
 
@@ -176,12 +173,6 @@ class MinistryController extends ChangeNotifier {
       .toList();
 
   Future<void> load() async {
-    if (SupabaseConfig.isConfigured && cloud?.currentUserId == null) {
-      screen = WorkflowScreen.authGate;
-      loading = false;
-      notifyListeners();
-      return;
-    }
     profile = await local.loadProfile();
     recyclerProfile = await local.loadRecyclerProfile();
     if (profile != null) {
@@ -194,11 +185,6 @@ class MinistryController extends ChangeNotifier {
         screen = WorkflowScreen.home;
       }
     } else {
-      // No local profile yet: either a first run, or (cloud mode) a brand
-      // new sign-in on this device where the profile hasn't been created
-      // locally yet. Without this, `screen` would stay stuck at whatever it
-      // was set to before this call (e.g. authGate right after signing in),
-      // requiring a manual page reload to reach onboarding.
       screen = WorkflowScreen.onboarding;
     }
     lots
@@ -259,7 +245,7 @@ class MinistryController extends ChangeNotifier {
     profile = null;
     recyclerProfile = null;
     _history.clear();
-    screen = cloud != null ? WorkflowScreen.authGate : WorkflowScreen.onboarding;
+    screen = WorkflowScreen.onboarding;
     lastError = '';
     notifyListeners();
   }
