@@ -160,31 +160,34 @@ class _AuthScreenState extends State<AuthScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: Stack(children: [
-                      Semantics(
-                        image: true,
-                        label: 'Kabadiwala Connect logo',
-                        child: Image.asset(
-                          'assets/branding/kabadiwala_connect_logo.png',
-                          width: 96,
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.high,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton.filledTonal(
+                        tooltip: c.t('language'),
+                        onPressed: _showLanguageSelector,
+                        style: IconButton.styleFrom(
+                          foregroundColor: primary,
+                          backgroundColor: primaryLight,
                         ),
+                        icon: const Icon(Icons.language_rounded),
                       ),
-                      Positioned(
-                        right: -8,
-                        top: -8,
-                        child: IconButton(
-                          tooltip: c.t('language'),
-                          onPressed: _showLanguageSelector,
-                          icon: const Icon(Icons.language_rounded, color: textMuted),
-                        ),
-                      ),
-                    ]),
+                    ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
+                  Center(
+                    child: Semantics(
+                      image: true,
+                      label: 'Kabadiwala Connect logo',
+                      child: Image.asset(
+                        'assets/branding/kabadiwala_connect_logo.png',
+                        width: 150,
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.high,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.fromLTRB(24, 32, 24, 20),
                     decoration: BoxDecoration(

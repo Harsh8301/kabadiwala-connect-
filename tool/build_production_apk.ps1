@@ -1,6 +1,8 @@
 param(
   [Parameter(Mandatory = $true)]
-  [string]$BackendUrl
+  [string]$BackendUrl,
+  [string]$SupabaseUrl = '',
+  [string]$SupabaseAnonKey = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,7 +28,15 @@ try {
   Remove-Item Env:KWC_BACKEND_HEALTH_URL
 }
 
-flutter build apk --release "--dart-define=API_BASE_URL=$base"
+$dartDefines = @("--dart-define=API_BASE_URL=$base")
+if ($SupabaseUrl -and $SupabaseAnonKey) {
+  $dartDefines += "--dart-define=SUPABASE_URL=$SupabaseUrl"
+  $dartDefines += "--dart-define=SUPABASE_ANON_KEY=$SupabaseAnonKey"
+} elseif ($SupabaseUrl -or $SupabaseAnonKey) {
+  throw 'Pass both -SupabaseUrl and -SupabaseAnonKey together, or neither (to build in local-only demo mode).'
+}
+
+flutter build apk --release @dartDefines
 if ($LASTEXITCODE -ne 0) {
   throw 'Flutter release APK build failed.'
 }
